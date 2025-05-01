@@ -1,5 +1,5 @@
 #!/bin/bash
-NOMBRE=TPE-Arqui
+NOMBRE=SO-TP2
 
 sudo docker run -d -v "$PWD":/root --security-opt seccomp:unconfined -ti --name $NOMBRE agodio/itba-so-multi-platform:3.0
 # sudo docker run -d -v "$PWD":/root --security-opt seccomp:unconfined -ti --name $NOMBRE agodio/itba-so:1.0
