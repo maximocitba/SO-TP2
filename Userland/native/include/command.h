@@ -19,6 +19,7 @@ void changeSize_2();
 void changeSize_3();
 void changeSize_4();
 void changeSize_5();
+void test_mem();
 
 //para excepciones (buscan en Assembler)
 extern void runInvalidOpcodeException(void);

@@ -44,6 +44,8 @@ void *initializeKernelBinary() {
 
     clearBSS(&bss, &endOfKernel - &bss);
 
+    uint64_t size = (void *)(uintptr_t)0x2000000 - (void*)(uintptr_t)0x1000000;
+    b_init((void*)(uintptr_t)0x1000000, size);
     return getStackBase();
 }
 

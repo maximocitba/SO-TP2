@@ -4,6 +4,7 @@
 #include "lib.h"
 #include "interrupts.h"
 #include "sound.h"
+#include "memman.h"
 
 #define SYS_HLT 0
 #define SYS_SOUND 1
@@ -19,6 +20,8 @@
 #define SYS_GET_ELAPSED_TICKS 10
 #define SYS_WIDTH_HEIGHT 11
 #define SYS_GETREGS 13
+#define SYS_MALLOC 14
+#define SYS_FREE 15
 
 uint64_t registers[18] = {0};
 
@@ -57,6 +60,11 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
             return sys_getSize(param_1);
         case SYS_GETREGS:
             sys_registers();
+            return 1;
+        case SYS_MALLOC:
+            return b_alloc(param_1);
+        case SYS_FREE:
+            b_free((void *)param_1);
             return 1;
     }
     return 0;

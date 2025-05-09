@@ -15,6 +15,8 @@
 #define SYS_GET_ELAPSED_TICKS 10
 #define SYS_WIDTH_HEIGHT 11
 #define SYS_GETREGS 13
+#define SYS_MALLOC 14
+#define SYS_FREE 15
 
 #include <stdint.h>
 
@@ -44,5 +46,8 @@ void sys_new_size(int newSize);
 int sys_getWindowSize(int elem);
 
 void sys_getRegs();
+
+void* sys_malloc(uint64_t size);
+void sys_free(void* ptr);
 
 #endif //TPE_ARQUI_SYSCALLS_H

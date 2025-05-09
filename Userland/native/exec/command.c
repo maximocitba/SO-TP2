@@ -3,6 +3,8 @@
 #include "../include/stdio.h"
 #include "../include/stdlib.h"
 #include "../include/eliminator.h"
+#include "../include/tests.h"
+
 
 #define REG_SIZE 17
 #define SECONDS 0
@@ -22,6 +24,8 @@ static command commands[] = {
         {"invalidopcode   :  ", "Muestra excepcion de codigo invalido.", invalidOpcode},
         {"inforeg         :  ", "Muestra los registros guardados.", sys_getRegs},
         {"clear           :  ", "Limpia toda la pantalla.", clear},
+        {"testmem         :  ", "Ejecuta el test de memoria.", test_mem},
+        
 };
 
 void print_help() {
@@ -62,6 +66,11 @@ void changeSize_4() {
 }
 void changeSize_5() {
     sys_new_size(5);
+}
+
+void test_mem() {
+    
+    test_mm( 500 );
 }
 
 

@@ -56,3 +56,11 @@ int sys_getWindowSize(int elem) {
 void sys_getRegs() {
     syscall(SYS_GETREGS, 0, 0, 0);
 }
+
+void *sys_malloc(uint64_t size) {
+    return (void*)syscall(SYS_MALLOC, size, 0, 0);
+}
+
+void sys_free(void* ptr) {
+    syscall(SYS_FREE, (uint64_t)ptr, 0, 0);
+}
