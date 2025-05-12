@@ -134,3 +134,11 @@ void * memset(void * destiation, int32_t c, uint64_t length) {
 	return destiation;
 }
 
+void * malloc(uint64_t size) {
+    return sys_malloc(size);
+}
+
+void free(void * ptr) {
+    sys_free(ptr);
+}
+
