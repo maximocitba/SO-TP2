@@ -28,6 +28,7 @@ $(MODULE): $(TOTAL_OBJ)
 	$(ASM) $(ASMFLAGS) $< -o $@
 
 clean:
-	rm -rf *.o exec/*.o libasm/*.o libc/*.o
+	rm -rf *.o exec/*.o libasm/*.o libc/*.o tests/*.o
+	rm -f ../$(MODULE) ../0000-sampleCodeModule.elf
 
 .PHONY: all clean print
