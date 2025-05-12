@@ -125,18 +125,12 @@ rtc_poll:
 	; 0x4115 is 800x600x24bit, 0x412E should be 32bit
 	; 0x4118 is 1024x768x24bit, 0x4138 should be 32bit
 	; 0x411B is 1280x1024x24bit, 0x413D should be 32bit
-	mov cx, 0x4118			; Put your desired mode here
+	; Setting CX to 0x0003 selects standard text mode (80x25)
+	mov cx, 0x0003			; Text mode 80x25 (previously 0x4118 for graphics mode)
 	mov bx, cx			; Mode is saved to BX for the set command later
 	int 0x10
 
 	cmp ax, 0x004F			; Return value in AX should equal 0x004F if command supported and successful
-	jne VBEfail
-	cmp byte [VBEModeInfoBlock.BitsPerPixel], 24	; Make sure this matches the number of bits for the mode!
-	jne VBEfail			; If set bit mode was unsuccessful then bail out
-	or bx, 0x4000			; Use linear/flat frame buffer model (set bit 14)
-	mov ax, 0x4F02			; SET SuperVGA VIDEO MODE - http://www.ctyme.com/intr/rb-0275.htm
-	int 0x10
-	cmp ax, 0x004F			; Return value in AX should equal 0x004F if supported and successful
 	jne VBEfail
 	jmp VBEdone
 

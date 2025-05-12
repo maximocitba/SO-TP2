@@ -87,7 +87,7 @@ void sys_registers() {
     }
 
     for (int i = 0; i < REGS_SIZE ; i++) {
-        char * buf;
+        char buf[20]; // Allocate a static buffer for conversion
         printf(regList[i]);
         uint32_t digits = uintToBase(regs[i], buf, 16);
         printf(" : 0x");
@@ -97,7 +97,8 @@ void sys_registers() {
             zeros--;
         }
         printf(buf);
-        putChar('\n');
+        printf("\n");
     }
+
     regsCaptured = 0;
 }

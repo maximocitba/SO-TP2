@@ -7,13 +7,15 @@ SOURCES_ASM=$(wildcard asm/*.asm)
 SOURCES_DRIVERS=$(wildcard drivers/*.c)
 SOURCES_NATIVE=$(wildcard native/*.c)
 SOURCES_IDT=$(wildcard idt/*.c)
+SOURCES_MEMORY=$(wildcard memory/*.c)
 
 OBJECTS=$(SOURCES:.c=.o)
 OBJECTS_DRIVERS=$(SOURCES_DRIVERS:.c=.o)
 OBJECTS_ASM=$(SOURCES_ASM:.asm=.o)
 OBJECTS_NATIVE=$(SOURCES_NATIVE:.c=.o)
 OBJECTS_IDT=$(SOURCES_IDT:.c=.o)
-TOTAL_OBJ = $(OBJECTS) $(OBJECTS_DRIVERS) $(OBJECTS_ASM) $(OBJECTS_NATIVE) $(OBJECTS_IDT)
+OBJECTS_MEMORY=$(SOURCES_MEMORY:.c=.o)
+TOTAL_OBJ = $(OBJECTS) $(OBJECTS_DRIVERS) $(OBJECTS_ASM) $(OBJECTS_NATIVE) $(OBJECTS_IDT) $(OBJECTS_MEMORY)
 
 LOADERSRC=loader.asm
 LOADEROBJECT=$(LOADERSRC:.asm=.o)
@@ -38,5 +40,6 @@ clean:
 	rm -rf idt/*.o drivers/*.o *.o *.bin
 	rm -rf drivers/*.o drivers/*.o *.o *.bin
 	rm -rf native/*.o drivers/*.o *.o *.bin
+	rm -rf memory/*.o drivers/*.o *.o *.bin
 
 .PHONY: all clean

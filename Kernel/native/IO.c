@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "font.h"
 #include "interrupts.h"
+#include "textmode.h"
 
 
 #define SIZE_BUFFER 1000
@@ -11,31 +12,55 @@ uint64_t x = 0;
 uint64_t y = 0;
 uint8_t fontSize = 1;
 
+// Flag to track if we're in text mode (no graphics)
+static int text_mode = 1;  // Default to text mode since we switched to it
+
 // putChar y printf facilitan el manejo de IO cuando el Kernel quiere escribir cosas
 void putChar(char c) {
-    putCharColoured(c, 0xFFFFFF, BG_COLOR);
+    if (text_mode) {
+        textmode_putchar(c);
+    } else {
+        putCharColoured(c, 0xFFFFFF, BG_COLOR);
+    }
 }
 
 void printf(char * str) {
-    for (int i = 0; str[i] != '\0'; i++) {
-        putChar(str[i]);
+    if (text_mode) {
+        textmode_write(str);
+    } else {
+        for (int i = 0; str[i] != '\0'; i++) {
+            putChar(str[i]);
+        }
     }
 }
 
-
+// Implementation of putCharColoured function
 void putCharColoured(char c, uint64_t foreGround, uint64_t backGround) {
-    switch (c) {
-        case 0x0A:
+    if (text_mode) {
+        // In text mode, just use the base putChar functionality
+        textmode_putchar(c);
+    } else {
+        // Handle special characters
+        if (c == '\n') {
             newLine(&x, &y);
-            break;
-        case 0x08:
+        } else if (c == '\t') {
+            for (int i = 0; i < 4; i++) {
+                putCharAt(' ', &x, &y, foreGround, backGround);
+            }
+        } else if (c == '\b') {
             deleteCharAt(&x, &y, backGround);
-            break;
-        default:
+        } else {
             putCharAt(c, &x, &y, foreGround, backGround);
-            break;
+        }
     }
 }
+
+// Forward declaration
+void newLine(uint64_t * x, uint64_t * y);
+void deleteCharAt(uint64_t * x, uint64_t * y, uint64_t backgroundColor);
+void putCharAt(uint8_t c, uint64_t * x, uint64_t * y, uint64_t foreColor, uint64_t backgroundColor);
+int xOutOfBounds(uint64_t * x);
+int yOutOfBounds(uint64_t * y);
 
 
 // el stdout no se guarda. Solo se guardan las coordenadas de la última posición
@@ -76,15 +101,14 @@ void clearIn(){
 
 
 // inspirado en la función de la API de Linux
-void sys_write(int fd, const char* buf, int count){
-    if (fd==1){
-        for(int i=0; i<count; i++){
-            putOut(buf[i]);
+void sys_write(int fd, const char* buf, int count) {
+    if (fd == 1) { // stdout
+        for (int i = 0; i < count; i++) {
+            putChar(buf[i]);
         }
-    }
-    if (fd==2){
-        for(int i=0; i<count; i++){
-            putErr(buf[i]);
+    } else if (fd == 2) { // stderr
+        for (int i = 0; i < count; i++) {
+            putCharColoured(buf[i], 0xFF0000, BG_COLOR); // Red color for stderr
         }
     }
 }
@@ -106,12 +130,12 @@ int sys_read(int fd, char* buf, int count){
 
 
 void sys_new_size(int newSize){
-    _cli;               //por las dudas paro los in/out (antes generaba bugs)
+    _cli();               //por las dudas paro los in/out (antes generaba bugs)
     if (newSize < 1 || newSize > 5)
         return;
     fontSize = newSize;
     sys_clearScreen();
-    _sti;
+    _sti();
 }
 
 // imprime caracter y modifica coordenadas. Usado para representar el stdout
@@ -167,7 +191,11 @@ int yOutOfBounds(uint64_t * y) {
 
 // resetea coordenadas
 void sys_clearScreen(){
-    clearScreen(BG_COLOR);
+    if (text_mode) {
+        textmode_clear();
+    } else {
+        clearScreen(BG_COLOR);
+    }
     y = 0;
     x = 0;
 }

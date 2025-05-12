@@ -1,5 +1,6 @@
 #include <shell.h>
 #include <stdio.h>
+#include <syscalls.h>
 
 static int var1 = 0;
 static int var2 = 0;
@@ -45,20 +46,15 @@ static int var2 = 0;
 //static void readInput(char command[COMMAND_LENGTH], char parameters[PARAM_QUANT][PARAM_LENGTH], char readBuffer[READ_BUFF_LEGTH])
 
 int main() {
+    // Add debug prints
+    printf("[Userland] Starting...\n");
+    printf("[Userland] Calling shell...\n");
+    
     shell();
-    //Limpiar pantalla
+    
+    printf("[Userland] Shell returned (this should not happen)\n");
 
-    //Print de entrada a shell + Print de Type "HELP" for a list of commands.
-
-    //Loop infinito (con while(1))de:{
-
-    //Lectura de ingreso de comando
-    //Un getter del commando
-    //Si se encuentra el comando, se ejecuta, y sino print de "command not found/n"
-
-    //} Fin del loop infinito
-
-    //Test if BSS is properly set up
+    // Test if BSS is properly set up
     if (var1 == 0 && var2 == 0)
         return 0xDEADC0DE;
 

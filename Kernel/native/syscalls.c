@@ -4,6 +4,7 @@
 #include "lib.h"
 #include "interrupts.h"
 #include "sound.h"
+#include "memman.h"  // Include memman.h to fix implicit declarations
 
 #define SYS_HLT 0
 #define SYS_SOUND 1
@@ -19,6 +20,8 @@
 #define SYS_GET_ELAPSED_TICKS 10
 #define SYS_WIDTH_HEIGHT 11
 #define SYS_GETREGS 13
+#define SYS_MALLOC 20
+#define SYS_FREE   21
 
 uint64_t registers[18] = {0};
 
@@ -31,10 +34,10 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
             nosound();
             return 1;
         case SYS_WRITE:
-            sys_write(param_1, param_2, param_3);
+            sys_write(param_1, (const char*)param_2, param_3);
             return 1;
         case SYS_READ:
-            return sys_read(param_1, param_2, param_3);
+            return sys_read(param_1, (char*)param_2, param_3);
         case SYS_CLEAR_SCREEN:
             sys_clearScreen();
             return 1;
@@ -58,6 +61,11 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
         case SYS_GETREGS:
             sys_registers();
             return 1;
+        case SYS_MALLOC:
+            return (uint64_t)malloc(param_1);
+        case SYS_FREE:
+            free((void*)param_1);
+            return 0;
     }
     return 0;
 }

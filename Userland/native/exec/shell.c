@@ -6,25 +6,30 @@
 #include "../include/stdlib.h"
 #include "../include/string.h"
 #include "../include/sounds.h"
-
+#include "../include/test_memman.h"
 
 #define MAX_BUF 1024
 
 // se podría cambiar la implementación para que se acepten parámetros (y no haya que hacer size 1, size 2...)
 // pero en este caso no hace falta porque hay pocos parámetros
-char * commands[] = {"clear", "dividebyzero", "help", "inforeg", "invalidopcode", "time", "eliminator",
-                     "size_1", "size_2", "size_3", "size_4", "size_5"};
-void (*commands_functions[])() = {clear,  divideByZero, print_help, sys_getRegs, invalidOpcode, time, eliminator,
-                                  changeSize_1, changeSize_2, changeSize_3, changeSize_4, changeSize_5};
+char * commands[] = {
+    "clear", "dividebyzero", "help", "inforeg", "invalidopcode", "time", "eliminator",
+    "size_1", "size_2", "size_3", "size_4", "size_5", "test_memman"
+};
+void (*commands_functions[])() = {
+    clear, divideByZero, print_help, sys_getRegs, invalidOpcode, time, eliminator,
+    changeSize_1, changeSize_2, changeSize_3, changeSize_4, changeSize_5, test_memman
+};
 
 void shell() {
-    play_song(2);
-    while (next_part());
+    // Skip playing sounds in text mode
+    // play_song(2);
+    // while (next_part());
+    
     printHeader();
-
+    
     do {
-        printf_color("user", 0xcdff00, 0x000000);
-        printf(":~$ ");
+        printf("user:~$ ");
         int break_line = 0;
         int i = 0;
         char command[MAX_BUF] = {0};
@@ -49,13 +54,13 @@ void shell() {
     } while (1);
 }
 void printHeader() {
-    printf_color("Bienvenido a la Shell!\n", 0xcdff00, 0x000000);
+    printf("Bienvenido a la Shell!\n");
     printf("Ejecuta 'help' para ver una lista de comandos.\n");
     return;
 }
 
-void execute(const char *inputBuffer) {
-    for (int i = 0; i < 12 ; i++)
+void execute(const char *inputBuffer) {    
+    for (int i = 0; i < 13 ; i++) // Updated to 13 to include test_memman
     {
         if (strcmp(inputBuffer, commands[i]) == 0)
         {

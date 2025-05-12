@@ -1,16 +1,16 @@
 #include "../include/syscalls.h"
-
+#include <stdint.h>
 
 void sys_hlt() {
     syscall(SYS_HLT, 0, 0, 0);
 }
 
 int sys_read(int fd, char * buf, int count){
-    return syscall(SYS_READ, fd, buf, count);
+    return syscall(SYS_READ, fd, (uint64_t)buf, count);
 }
 
 void sys_write(int fd, char * buf, int count){
-    syscall(SYS_WRITE, fd, buf, count);
+    syscall(SYS_WRITE, fd, (uint64_t)buf, count);
 }
 
 uint64_t sys_time(int d) {
@@ -55,4 +55,22 @@ int sys_getWindowSize(int elem) {
 
 void sys_getRegs() {
     syscall(SYS_GETREGS, 0, 0, 0);
+}
+
+// Memory management syscalls
+void *sys_malloc(size_t size) {
+    return (void *)syscall(SYS_MALLOC, size, 0, 0);
+}
+
+void sys_free(void *ptr) {
+    syscall(SYS_FREE, (uint64_t)ptr, 0, 0);
+}
+
+// Standard C memory functions
+void *malloc(size_t size) {
+    return sys_malloc(size);
+}
+
+void free(void *ptr) {
+    sys_free(ptr);
 }

@@ -73,27 +73,57 @@ void itoa(uint64_t num, char * buf) {
     buf[bufLen] = '\0';
 }
 
+void itoa_base(uint64_t num, char * buf, int base) {
+    char aux[MAX_BUF];
+    char digits[] = "0123456789ABCDEF";
+    int i = 0;
 
+    // Handle special case of 0
+    if (num == 0) {
+        aux[i++] = '0';
+    }
+
+    // Process digits in reverse order
+    while (num > 0) {
+        aux[i++] = digits[num % base];
+        num /= base;
+    }
+    aux[i] = '\0';
+
+    // Reverse the string
+    int bufLen = i;
+    for (int j = 0; j < bufLen; ++j) {
+        buf[j] = aux[bufLen - j - 1];
+    }
+    buf[bufLen] = '\0';
+}
 
 uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base) {
     char *p = buffer;
     char *p1, *p2;
     uint32_t digits = 0;
 
-    do
-    {
+    // Handle special case for zero
+    if (value == 0) {
+        *p++ = '0';
+        *p = 0;
+        return 1;
+    }
+
+    // Convert to specified base (decimal, hex, etc.)
+    do {
         uint32_t remainder = value % base;
         *p++ = (remainder < 10) ? remainder + '0' : remainder + 'A' - 10;
         digits++;
-    }
-    while (value /= base);
+    } while (value /= base);
 
+    // Terminate string
     *p = 0;
 
+    // Reverse the string in-place
     p1 = buffer;
     p2 = p - 1;
-    while (p1 < p2)
-    {
+    while (p1 < p2) {
         char tmp = *p1;
         *p1 = *p2;
         *p2 = tmp;

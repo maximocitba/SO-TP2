@@ -1,6 +1,8 @@
 #ifndef TPE_ARQUI_KEYBOARD_H
 #define TPE_ARQUI_KEYBOARD_H
 
+#include <stdint.h>
+
 typedef struct {
     int character;
     int make_code;
@@ -11,5 +13,8 @@ typedef struct {
 extern char getKey();   // de libasm.asm
 char mapKey(char character, int flags[2]);
 void keyboard_handler();
+
+// Add declaration for the ASM function
+uint8_t getPressedKey();
 
 #endif

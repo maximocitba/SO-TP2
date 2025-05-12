@@ -3,6 +3,7 @@
 #include "../include/stdio.h"
 #include "../include/stdlib.h"
 #include "../include/eliminator.h"
+#include "../include/test_memman.h"
 
 #define REG_SIZE 17
 #define SECONDS 0
@@ -22,6 +23,7 @@ static command commands[] = {
         {"invalidopcode   :  ", "Muestra excepcion de codigo invalido.", invalidOpcode},
         {"inforeg         :  ", "Muestra los registros guardados.", sys_getRegs},
         {"clear           :  ", "Limpia toda la pantalla.", clear},
+        {"test_memman     :  ", "Ejecuta test de memoria.", test_memman},
 };
 
 void print_help() {
