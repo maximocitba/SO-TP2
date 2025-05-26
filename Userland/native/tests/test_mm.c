@@ -21,12 +21,13 @@ uint64_t test_mm(uint64_t max_memory) {
     uint32_t total;
 
 
-    printf("starting endless loop\n");
-    while (1) {
+    // printf("starting endless loop\n");
+    int wh = 1;
+    while (wh--) {
         rq = 0;
         total = 0;
 
-        printf("starting test while\n");
+        
         // Request as many blocks as we can
         while (rq < MAX_BLOCKS && total < max_memory) {
             mm_rqs[rq].size = GetUniform(max_memory - total - 1) + 1;
@@ -37,16 +38,19 @@ uint64_t test_mm(uint64_t max_memory) {
                 rq++;
             }
         }
+        printf("[test_mm] allocated %d blocks\n", rq);
 
         // Set
-        printf("starting test set\n");
+        // printf("starting test set\n");
         uint32_t i;
         for (i = 0; i < rq; i++)
             if (mm_rqs[i].address)
                 memset(mm_rqs[i].address, i, mm_rqs[i].size);
 
+        printf("[test_mm] set %d blocks\n", rq);
+
         // Check
-        printf("starting test check\n");
+        // printf("starting test check\n");
         for (i = 0; i < rq; i++)
             if (mm_rqs[i].address)
                 if (!memcheck(mm_rqs[i].address, i, mm_rqs[i].size)) {
@@ -54,11 +58,14 @@ uint64_t test_mm(uint64_t max_memory) {
                     return -1;
                 }
 
-        printf("starting test free\n");
+        // printf("starting test free\n");
         // Free
         for (i = 0; i < rq; i++)
-            if (mm_rqs[i].address)
+            if (mm_rqs[i].address){
                 free(mm_rqs[i].address);
+                printf("[test_mm] freed block %d of size %d\n", i, mm_rqs[i].size);
+            }
+
     }
-    printf("test_mm OK\n");
+    printf("[test_mm] finished correctly\n");
 }

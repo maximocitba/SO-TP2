@@ -2,6 +2,8 @@
 #include <lib.h>
 #include <moduleLoader.h>
 #include <idtLoader.h>
+#include <memman.h>
+#include <scheduler.h>
 
 extern void test_int_80h();
 
@@ -46,6 +48,7 @@ void *initializeKernelBinary() {
 
     uint64_t size = (void *)(uintptr_t)0x2000000 - (void*)(uintptr_t)0x1000000;
     b_init((void*)(uintptr_t)0x1000000, size);
+    init_scheduler();
     return getStackBase();
 }
 

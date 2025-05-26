@@ -41,20 +41,10 @@ void remove_all_nodes(linked_list_adt list, void * process) {
     node_t *current = list->head;
     int removed = 0;
 
-    if (current == NULL) {
-        printf("[remove_all_nodes] List is empty\n");
-        return;
-    }
-
-
-    printf("[remove_all_nodes] Removing nodes with process1\n");
     while (current != NULL) {
-        printf("[remove_all_nodes] iterating\n");
-        node_t *next = current->next; // Save next before possibly freeing current
+        node_t *next = current->next;
         if (current->process == process) {
-            printf("[remove_all_nodes] Removing node with process2\n");
             if (prev == NULL) {
-                // Removing head
                 list->head = next;
             } else {
                 prev->next = next;
@@ -65,7 +55,7 @@ void remove_all_nodes(linked_list_adt list, void * process) {
             b_free(current);
             list->size--;
             removed++;
-            // Do not advance prev, as current was removed
+            // Do not advance prev
         } else {
             prev = current;
         }
@@ -75,7 +65,7 @@ void remove_all_nodes(linked_list_adt list, void * process) {
         list->head = NULL;
         list->tail = NULL;
     }
-    printf("[remove_all_nodes] Finished. Total removed3\n");
+   
 }
 
 

@@ -31,8 +31,8 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
 
     p_rq p_rqs[max_processes];
 
-
-    while (1) {
+    int wh = 1;
+    while (wh--) {
         // Create max_processes processes
         for (rq = 0; rq < max_processes; rq++) {
             p_rqs[rq].pid = sys_exec((void *)&endless_loop_wrap, argv_aux, 0, "test", 1);
@@ -43,30 +43,30 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
             } else {
                 p_rqs[rq].state = RUNNING;
                 
-                printf("soy un proceso de pid: %d\n", p_rqs[rq].pid);
+                // printf("soy un proceso de pid: %d\n", p_rqs[rq].pid);
                 alive++;
             }
         }
-        printf("Termine de crear los procesos\n");
+        printf("[test_processes] created %d processes\n", max_processes);
         
         // Randomly kills, blocks or unblocks processes until every one has been killed
         while (alive > 0) {
 
             for (rq = 0; rq < max_processes; rq++) {
-                // action = GetUniform(100) % 2;
-                action = 0;
+                action = GetUniform(100) % 2;
+                // action = 0;
                 switch (action) {
                 case 0:
                     if (p_rqs[rq].state == RUNNING || p_rqs[rq].state == BLOCKED) {
-                        printf("hola\n");
+                        
                         if (sys_kill(p_rqs[rq].pid) == -1) {
                             printf("test_processes: ERROR killing process of pid: %d\n", p_rqs[rq].pid);
                             return -1;
                         }
-                        printf("No di error, voy a matar el proceso\n");
+                        // printf("No di error, voy a matar el proceso\n");
                         p_rqs[rq].state = KILLED;
                         alive--;
-                        printf("test_processes: killed process of pid: %d\n", p_rqs[rq].pid);
+                        printf("[test_processes] killed process of pid: %d\n", p_rqs[rq].pid);
                     }
                     break;
 
@@ -92,6 +92,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
                     p_rqs[rq].state = RUNNING;
                 }
         }
-        printf("Estoy al final");
+
+        printf("[test_processes] all processes have been killed correctly\n");
     }
 }

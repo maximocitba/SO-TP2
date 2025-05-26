@@ -268,14 +268,14 @@ int kill_process(uint32_t pid) {
     // remove_from_all_semaphores(pid);
     
     if (process_to_kill->state == blocked) {
-        printf("\n_killing blocked process\n");
+        // printf("\n_killing blocked process\n");
         remove_all_nodes(scheduler->blocked_process_list, (void *)process_to_kill);
     } else {
-        printf("\n_killing running process\n");
+        // printf("\n_killing running process\n");
         remove_all_nodes(scheduler->process_list, (void *)process_to_kill);
     }
     
-    printf("\n_killing process\n");
+    // printf("\n_killing process\n");
     if (process_to_kill->parent_pid != idle_pid) {
     }
 
