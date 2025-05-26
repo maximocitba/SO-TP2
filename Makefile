@@ -1,5 +1,8 @@
-all:  bootloader kernel userland image
+all:  bootloader kernel userland toolchain image
 
+toolchain:
+	cd Toolchain; make all
+	
 bootloader:
 	cd Bootloader; make all
 
@@ -9,8 +12,11 @@ kernel:
 userland:
 	cd Userland; make all
 
-image: kernel bootloader userland
+image: kernel bootloader userland Toolchain/ModulePacker/mp.bin
 	cd Image; make all
+
+Toolchain/ModulePacker/mp.bin:
+	cd Toolchain/ModulePacker; make all
 
 clean:
 	cd Bootloader; make clean
