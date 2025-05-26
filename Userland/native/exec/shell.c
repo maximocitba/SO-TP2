@@ -14,9 +14,9 @@
 // se podría cambiar la implementación para que se acepten parámetros (y no haya que hacer size 1, size 2...)
 // pero en este caso no hace falta porque hay pocos parámetros
 char * commands[] = {"clear", "dividebyzero", "help", "inforeg", "invalidopcode", "time", "eliminator",
-                     "size_1", "size_2", "size_3", "size_4", "size_5", "testmem"};
+                     "size_1", "size_2", "size_3", "size_4", "size_5", "testmem", "testproc"};
 void (*commands_functions[])() = {clear,  divideByZero, print_help, sys_getRegs, invalidOpcode, time, eliminator,
-                                  changeSize_1, changeSize_2, changeSize_3, changeSize_4, changeSize_5, test_mem};
+                                  changeSize_1, changeSize_2, changeSize_3, changeSize_4, changeSize_5, test_mem, test_proc};
 
 void shell() {
     play_song(2);
@@ -56,7 +56,7 @@ void printHeader() {
 }
 
 void execute(const char *inputBuffer) {
-    for (int i = 0; i < 13 ; i++)
+    for (int i = 0; i < 14 ; i++)
     {
         if (strcmp(inputBuffer, commands[i]) == 0)
         {

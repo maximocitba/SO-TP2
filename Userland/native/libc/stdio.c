@@ -40,12 +40,10 @@ static void print_str(const char * str, uint64_t foreground, uint64_t background
     }
 }
 
-uint64_t printf_color(const char * fmt, uint64_t foreground, uint64_t background, ...) {
-    va_list args;
-    va_start(args, fmt);
+// ...existing code...
 
+uint64_t vprintf_color(const char * fmt, uint64_t foreground, uint64_t background, va_list args) {
     uint64_t i = 0;
-
     while (fmt[i]) {
         if (fmt[i] == '%') {
             char buf[MAX_BUF];
@@ -55,7 +53,7 @@ uint64_t printf_color(const char * fmt, uint64_t foreground, uint64_t background
                     print_str(buf, foreground, background);
                     break;
                 case 's':
-                    print_str(buf, foreground, background);
+                    print_str(va_arg(args, char *), foreground, background);
                     break;
                 case '%':
                     putchar('%');
@@ -67,15 +65,22 @@ uint64_t printf_color(const char * fmt, uint64_t foreground, uint64_t background
             putchar(fmt[i]);
         }
         i++;
-        va_end(args);
     }
     return i;
+}
+
+uint64_t printf_color(const char * fmt, uint64_t foreground, uint64_t background, ...) {
+    va_list args;
+    va_start(args, background);
+    uint64_t ret = vprintf_color(fmt, foreground, background, args);
+    va_end(args);
+    return ret;
 }
 
 void printf(const char * fmt, ...) {
     va_list args;
     va_start(args, fmt);
-    printf_color(fmt, 0xFFFFFF, 0x000000, args);
+    vprintf_color(fmt, 0xFFFFFF, 0x000000, args);
     va_end(args);
 }
 

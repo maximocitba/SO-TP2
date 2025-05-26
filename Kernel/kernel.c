@@ -50,6 +50,8 @@ void *initializeKernelBinary() {
 }
 
 int main() {
+    create_process((void*)sampleCodeModuleAddress, NULL, 0, "shell", 4, 1);
+
     load_idt();
 
     // sys_registers();     // descomentar para ver registros del kernel

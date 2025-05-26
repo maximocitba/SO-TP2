@@ -17,10 +17,14 @@
 #define SYS_GETREGS 13
 #define SYS_MALLOC 14
 #define SYS_FREE 15
+#define SYS_EXEC 16
+#define SYS_KILL 17
+#define SYS_BLOCK 18
+#define SYS_UNBLOCK 19
 
 #include <stdint.h>
 
-extern uint64_t syscall(uint64_t id, uint64_t par2, void * par3, uint64_t par4);
+extern uint64_t syscall(uint64_t id, uint64_t par1, void * par2, uint64_t par3, uint64_t par4, uint64_t par5);
 
 void sys_hlt();
 
@@ -49,5 +53,12 @@ void sys_getRegs();
 
 void* sys_malloc(uint64_t size);
 void sys_free(void* ptr);
+
+int64_t sys_exec(void *code, char **argv, int argc, char *name, uint8_t priority);
+
+int sys_kill(uint64_t pid);
+
+int sys_block(uint64_t pid);
+int sys_unblock(uint64_t pid);
 
 #endif //TPE_ARQUI_SYSCALLS_H

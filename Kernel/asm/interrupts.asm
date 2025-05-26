@@ -20,6 +20,9 @@ GLOBAL saveCurrentRegisters
 GLOBAL _exception00Handler
 GLOBAL _exception06Handler
 
+global create_process_stack_frame
+
+global asm_do_timer_tick
 
 EXTERN main
 EXTERN getStackBase
@@ -280,6 +283,42 @@ _int80Handler:
 haltcpu:
 	cli
 	hlt
+	ret
+
+; Parametros:
+; (void *)code -> rdi
+; (void *)stack_end -> rsi
+; (void *)argv -> rdx
+; (uint64_t)argc -> rcx
+; (void *)process_handler -> r8
+create_process_stack_frame:
+	; Previous stack
+    mov r14, rsp     ; Preserve rsp 
+    mov r15, rbp     ; Preserve rbp
+
+	; New stack (for the program)
+    mov rsp, rsi     ; Set sp of the process 
+    mov rbp, rsi     ; Set bp of the process
+
+    push 0x0         ; ss 
+    push rsi         ; rsp
+    push 0x202       ; rflags
+    push 0x8         ; cs 
+    push r8         ; rip 
+
+	mov rdi, rdi		; code
+    mov rsi, rdx     	; argv
+    mov rdx, rcx     	; argc
+	push_state
+
+    mov rax, rsp  
+    mov rsp, r14
+    mov rbp, r15
+    
+    ret
+
+asm_do_timer_tick:
+	int 0x20
 	ret
 
 

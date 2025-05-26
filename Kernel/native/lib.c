@@ -5,6 +5,7 @@
 #include "interrupts.h"
 #include "naiveConsole.h"
 
+
 void * memset(void * destination, int32_t c, uint64_t length)
 {
 	uint8_t chr = (uint8_t)c;
@@ -100,4 +101,71 @@ void sys_registers() {
         putChar('\n');
     }
     regsCaptured = 0;
+}
+
+void int_to_string(int num, char *str) {
+    int i = 0;
+    int is_negative = 0;
+
+    if (num == 0) {
+        str[i++] = '0';
+        str[i] = '\0';
+        return;
+    }
+
+    if (num < 0) {
+        is_negative = 1;
+        num = -num;
+    }
+
+    while (num != 0) {
+        str[i++] = (num % 10) + '0'; 
+        num /= 10;
+    }
+
+    if (is_negative) {
+        str[i++] = '-';
+    }
+
+    str[i] = '\0'; 
+
+    for (int j = 0; j < i / 2; j++) {
+        char temp = str[j];
+        str[j] = str[i - j - 1];
+        str[i - j - 1] = temp;
+    }
+}
+
+
+void print_number(int number) {
+    char buffer[20];
+    int_to_string(number, buffer); 
+    printf(buffer); 
+}
+
+
+void pointer_to_string(void *ptr, char *buffer, size_t buffer_size) {
+    
+    memset(buffer, 0, buffer_size);
+    
+    if (buffer_size < 20) {
+        return; 
+    }
+
+    uintptr_t address = (uintptr_t)ptr;
+
+    int index = 0;
+    buffer[index++] = '0';   
+    buffer[index++] = 'x';   
+
+    for (int i = 8; i >= 0; i--) {
+        int digit = (address >> (i * 4)) & 0xf; 
+        if (digit < 10) {
+            buffer[index++] = '0' + digit; 
+        } else {
+            buffer[index++] = 'a' + (digit - 10); 
+        }
+    }
+
+    buffer[index] = '\0';
 }

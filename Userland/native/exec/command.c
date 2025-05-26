@@ -1,10 +1,9 @@
 #include "../include/command.h"
-#include "../include/syscalls.h"
+#include "../include/eliminator.h"
 #include "../include/stdio.h"
 #include "../include/stdlib.h"
-#include "../include/eliminator.h"
+#include "../include/syscalls.h"
 #include "../include/tests.h"
-
 
 #define REG_SIZE 17
 #define SECONDS 0
@@ -16,29 +15,29 @@
 #define YEAR 9
 
 static command commands[] = {
-        {"help            :  ", "Muestra la lista de comandos.", print_help},
-        {"time            :  ", "Muestra la hora.", time},
-        {"eliminator      :  ", "Ejecuta el juego eliminator.", eliminator},
-        {"size_<1-5>      :  ", "cambia tamanio de letra (entre 1 a 5).", changeSize_1},
-        {"dividebyzero    :  ", "Muestra excepcion de division de 0.", divideByZero},
-        {"invalidopcode   :  ", "Muestra excepcion de codigo invalido.", invalidOpcode},
-        {"inforeg         :  ", "Muestra los registros guardados.", sys_getRegs},
-        {"clear           :  ", "Limpia toda la pantalla.", clear},
-        {"testmem         :  ", "Ejecuta el test de memoria.", test_mem},
-        
+    {"help            :  ", "Muestra la lista de comandos.", print_help},
+    {"time            :  ", "Muestra la hora.", time},
+    {"eliminator      :  ", "Ejecuta el juego eliminator.", eliminator},
+    {"size_<1-5>      :  ", "cambia tamanio de letra (entre 1 a 5).", changeSize_1},
+    {"dividebyzero    :  ", "Muestra excepcion de division de 0.", divideByZero},
+    {"invalidopcode   :  ", "Muestra excepcion de codigo invalido.", invalidOpcode},
+    {"inforeg         :  ", "Muestra los registros guardados.", sys_getRegs},
+    {"clear           :  ", "Limpia toda la pantalla.", clear},
+    {"testmem         :  ", "Ejecuta el test de memoria.", test_mem},
+    {"testproc        :  ", "Ejecuta el test de procesos.", test_proc},
+
 };
 
 void print_help() {
     printf("Presiona left alt para guardar registros en cualquier momento\n");
     printf("Comandos disponibles:\n");
-    for (int i = 0 ; i < sizeof(commands)/sizeof(command) ; i++) {
+    for (int i = 0; i < sizeof(commands) / sizeof(command); i++) {
         printf(commands[i].title);
         printf(" : ");
         printf(commands[i].desc);
         printf("\n");
     }
 }
-
 
 void clear() {
     sys_clear();
@@ -69,11 +68,13 @@ void changeSize_5() {
 }
 
 void test_mem() {
-    
-    test_mm( 500 );
+    test_mm(500);
 }
 
-
+void test_proc() {
+    
+    test_processes(3, NULL );
+}
 
 void time() {
 
@@ -85,7 +86,7 @@ void time() {
     printInt(hours);
     printf(":");
     int minutes = sys_time(MINUTES);
-    if(minutes < 10)
+    if (minutes < 10)
         printf("0");
     printInt(minutes);
     printf(", ");
