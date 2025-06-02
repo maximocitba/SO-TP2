@@ -70,6 +70,7 @@ int64_t sys_exec(void *code, char **argv, int argc, char *name, uint8_t priority
 }
 
 int sys_kill(uint64_t pid) {
+    printf("Killing process %d\n", pid);
     return syscall(SYS_KILL, pid, 0, 0, 0, 0);
 }
 
@@ -80,4 +81,8 @@ int sys_block(uint64_t pid) {
 
 int sys_unblock(uint64_t pid) {
     return syscall(SYS_UNBLOCK, pid, 0, 0, 0, 0);
+}
+
+int sys_nice(uint64_t pid, uint8_t priority) {
+    return syscall(SYS_NICE, pid, priority, 0, 0, 0);
 }

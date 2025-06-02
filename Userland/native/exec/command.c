@@ -25,6 +25,8 @@ static command commands[] = {
     {"clear           :  ", "Limpia toda la pantalla.", clear},
     {"testmem         :  ", "Ejecuta el test de memoria.", test_mem},
     {"testproc        :  ", "Ejecuta el test de procesos.", test_proc},
+    {"testprio        :  ", "Ejecuta el test de prioridades.", test_prior},
+    
 
 };
 
@@ -73,7 +75,11 @@ void test_mem() {
 
 void test_proc() {
     
-    test_processes(3, NULL );
+    test_processes(14, NULL );
+}
+
+void test_prior() {
+    test_prio();
 }
 
 void time() {

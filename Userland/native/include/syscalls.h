@@ -21,6 +21,7 @@
 #define SYS_KILL 17
 #define SYS_BLOCK 18
 #define SYS_UNBLOCK 19
+#define SYS_NICE 20
 
 #include <stdint.h>
 
@@ -60,5 +61,7 @@ int sys_kill(uint64_t pid);
 
 int sys_block(uint64_t pid);
 int sys_unblock(uint64_t pid);
+
+int sys_nice(uint64_t pid, uint8_t priority);
 
 #endif //TPE_ARQUI_SYSCALLS_H

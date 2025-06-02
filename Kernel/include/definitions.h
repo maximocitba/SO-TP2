@@ -3,10 +3,10 @@
 
 #include <stdint.h>
 
-#define MAX_PROCESSES (1<<5)
+#define MAX_PROCESSES (1<<15)
 #define stack_size (1<<12)
 #define SCHEDULER_ADDRESS 0x600000
-#define MAX_PRIORITY 5
+#define MAX_PRIORITY 15
 #define EOF (-1)
 #define BUILTIN_FDS 3
 #define DEV_NULL -1

@@ -27,6 +27,7 @@
 #define SYS_KILL 17
 #define SYS_BLOCK 18
 #define SYS_UNBLOCK 19
+#define SYS_NICE 20
 
 uint64_t registers[18] = {0};
 
@@ -79,6 +80,9 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
             return block_process(param_1);
         case SYS_UNBLOCK:
             return unblock_process(param_1);
+        case SYS_NICE:
+            process_priority(param_1, (uint8_t)param_2);
+            return 1;
     }
     return 0;
 }
