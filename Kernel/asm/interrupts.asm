@@ -21,6 +21,7 @@ GLOBAL _exception00Handler
 GLOBAL _exception06Handler
 
 global create_process_stack_frame
+global acquire, release
 
 global asm_do_timer_tick
 
@@ -321,7 +322,18 @@ asm_do_timer_tick:
 	int 0x20
 	ret
 
+acquire:
+    mov rax, 0          ; Value we want to set (locked)
+.retry:
+    xchg [rdi], rax     ; Atomically swap with memory
+    test rax, rax       ; Test if it was already locked (1)
+    jz .retry          ; If it was locked, retry
+    ret                 ; If it was unlocked (0), we got the lock
+release:
+    mov DWORD [rdi], 1  ; Set to unlocked
+    ret
 
+	
 SECTION .bss
 	aux resq 1
 	regex resq 18 			;reserva espacio para 18 qwords (cada registro para mostrarlos en las excepciones)

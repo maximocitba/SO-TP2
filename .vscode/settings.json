@@ -22,6 +22,8 @@
         "process.h": "c",
         "eliminator.h": "c",
         "unistd.h": "c",
-        "linked_list.h": "c"
+        "linked_list.h": "c",
+        "functional": "c",
+        "semaphore.h": "c"
     }
 }

@@ -26,7 +26,7 @@ static command commands[] = {
     {"testmem         :  ", "Ejecuta el test de memoria.", test_mem},
     {"testproc        :  ", "Ejecuta el test de procesos.", test_proc},
     {"testprio        :  ", "Ejecuta el test de prioridades.", test_prior},
-    
+    {"testsync        :  ", "Ejecuta el test de sincronizacion.", test_syncro},
 
 };
 
@@ -74,12 +74,18 @@ void test_mem() {
 }
 
 void test_proc() {
-    
-    test_processes(14, NULL );
+
+    test_processes(14, NULL);
 }
 
 void test_prior() {
+    // int pid = sys_exec((void *)&test_prio, NULL, 0, "test_prio", 1);
+    // sys_waitpid(pid); // Espera a que el proceso termine
     test_prio();
+}
+
+void test_syncro() {
+    test_sync(2, (char *[]){"1000", "1"});
 }
 
 void time() {

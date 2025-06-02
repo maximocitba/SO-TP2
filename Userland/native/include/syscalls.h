@@ -22,6 +22,13 @@
 #define SYS_BLOCK 18
 #define SYS_UNBLOCK 19
 #define SYS_NICE 20
+#define SYS_GET_PID 21
+#define SYS_WAIT_PID 22
+#define SYS_SEM_OPEN 23
+#define SYS_SEM_WAIT 24
+#define SYS_SEM_POST 25
+#define SYS_SEM_CLOSE 26
+#define SYS_YIELD 27
 
 #include <stdint.h>
 
@@ -63,5 +70,17 @@ int sys_block(uint64_t pid);
 int sys_unblock(uint64_t pid);
 
 int sys_nice(uint64_t pid, uint8_t priority);
+
+int sys_get_pid();
+
+void sys_waitpid(uint64_t pid);
+
+int sys_sem_open(int64_t id, int64_t initial_value);
+void sys_sem_wait(uint64_t sem_id);
+void sys_sem_post(uint64_t sem_id);
+void sys_sem_close(uint64_t sem_id);
+
+void sys_yield();
+
 
 #endif //TPE_ARQUI_SYSCALLS_H

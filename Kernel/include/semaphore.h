@@ -1,0 +1,28 @@
+#ifndef semaphore_h
+#define semaphore_h
+
+#include "../include/linked_list.h"
+#include "../include/queue_pid.h"
+#include <stdint.h>
+
+#define max_semaphores (1<<10)
+
+typedef struct{
+    int64_t id;
+    int64_t value;
+    int8_t mutex;
+    queue_pid_adt list;
+}sem_t;
+
+extern void acquire(int8_t *lock);
+extern void release(int8_t *lock);
+
+int32_t sem_open(int64_t id, int64_t value);
+int32_t sem_create(int64_t value);
+void sem_close(int64_t id);
+void sem_wait(int64_t id);
+void sem_post(int64_t id);
+void sem_cleanup_process(int64_t pid);
+void remove_from_all_semaphores(uint32_t pid);
+
+#endif

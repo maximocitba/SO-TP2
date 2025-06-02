@@ -6,6 +6,7 @@
 #include "sound.h"
 #include "memman.h"
 #include "scheduler.h"
+#include "../include/semaphore.h"
 
 #define SYS_HLT 0
 #define SYS_SOUND 1
@@ -28,6 +29,13 @@
 #define SYS_BLOCK 18
 #define SYS_UNBLOCK 19
 #define SYS_NICE 20
+#define SYS_GET_PID 21
+#define WAIT_PID 22
+#define SYS_SEM_OPEN 23
+#define SYS_SEM_WAIT 24
+#define SYS_SEM_POST 25
+#define SYS_SEM_CLOSE 26
+#define SYS_YIELD 27
 
 uint64_t registers[18] = {0};
 
@@ -82,6 +90,25 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
             return unblock_process(param_1);
         case SYS_NICE:
             process_priority(param_1, (uint8_t)param_2);
+            return 1;
+        case SYS_GET_PID:
+            return get_current_pid();
+        case WAIT_PID: 
+            waitpid((uint32_t)param_1);
+            return 1;
+        case SYS_SEM_OPEN:
+            return sem_open(param_1, param_2);
+        case SYS_SEM_WAIT:
+            sem_wait(param_1);
+            return 1;
+        case SYS_SEM_POST:
+            sem_post(param_1);
+            return 1;
+        case SYS_SEM_CLOSE:
+            sem_close(param_1);
+            return 1;
+        case SYS_YIELD:
+            yield();
             return 1;
     }
     return 0;

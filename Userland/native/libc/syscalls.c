@@ -70,7 +70,6 @@ int64_t sys_exec(void *code, char **argv, int argc, char *name, uint8_t priority
 }
 
 int sys_kill(uint64_t pid) {
-    printf("Killing process %d\n", pid);
     return syscall(SYS_KILL, pid, 0, 0, 0, 0);
 }
 
@@ -85,4 +84,32 @@ int sys_unblock(uint64_t pid) {
 
 int sys_nice(uint64_t pid, uint8_t priority) {
     return syscall(SYS_NICE, pid, priority, 0, 0, 0);
+}
+
+int sys_get_pid() {
+    return syscall(SYS_GET_PID, 0, 0, 0, 0, 0);
+}
+
+void sys_waitpid(uint64_t child_pid) {
+    syscall(SYS_WAIT_PID, child_pid, 0, 0, 0, 0);
+}
+
+int sys_sem_open(int64_t id, int64_t initial_value) {
+    syscall(SYS_SEM_OPEN, id, initial_value, 0, 0, 0);
+}
+
+void sys_sem_wait(uint64_t id) {
+    syscall(SYS_SEM_WAIT, id, 0, 0, 0, 0);
+}
+
+void sys_sem_post(uint64_t id) {
+    syscall(SYS_SEM_POST, id, 0, 0, 0, 0);
+}
+
+void sys_sem_close(uint64_t id) {
+    syscall(SYS_SEM_CLOSE, id, 0, 0, 0, 0);
+}
+
+void sys_yield() {
+    syscall(SYS_YIELD, 0, 0, 0, 0, 0);
 }
