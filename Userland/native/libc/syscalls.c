@@ -66,6 +66,7 @@ void sys_free(void *ptr) {
 }
 
 int64_t sys_exec(void *code, char **argv, int argc, char *name, uint8_t priority) {
+    printf("Executing '%s' with priority %d\n", name, priority);
     syscall(SYS_EXEC, (uint64_t)code, (uint64_t)argv, argc, (uint64_t)name, priority);
 }
 

@@ -185,7 +185,7 @@ int32_t create_process(function code, char **args, int argc, char *name, uint8_t
     return process->pid;
 }
 
-void waitpid(uint32_t child_pid) {
+void waitpid(uint64_t child_pid) {
     process_t *parent = get_current_process();
     process_t *child = get_process_by_pid(child_pid);
     if (child == NULL || child->parent_pid != parent->pid) {

@@ -14,7 +14,8 @@ typedef struct P_rq {
 } p_rq;
 
 static void endless_loop_wrap() {
-    endless_loop();
+    printf("[endless_loop_wrap] process with pid: %d started\n", sys_get_pid());
+    // endless_loop();
 }
 
 int64_t test_processes(uint64_t argc, char *argv[]) {
@@ -53,8 +54,8 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
         while (alive > 0) {
 
             for (rq = 0; rq < max_processes; rq++) {
-                action = GetUniform(100) % 2;
-                // action = 0;
+                // action = GetUniform(100) % 2;
+                action = 1;
                 switch (action) {
                 case 0:
                     if (p_rqs[rq].state == RUNNING || p_rqs[rq].state == BLOCKED) {

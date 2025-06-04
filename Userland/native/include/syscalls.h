@@ -32,12 +32,12 @@
 
 #include <stdint.h>
 
-extern uint64_t syscall(uint64_t id, uint64_t par1, void * par2, uint64_t par3, uint64_t par4, uint64_t par5);
+extern uint64_t syscall(uint64_t id, uint64_t par1, void *par2, uint64_t par3, uint64_t par4, uint64_t par5);
 
 void sys_hlt();
 
-int sys_read(int fd, char * buf, int count);
-void sys_write(int fd, char* buf, int count);
+int sys_read(int fd, char *buf, int count);
+void sys_write(int fd, char *buf, int count);
 
 uint64_t sys_time(int d);
 
@@ -48,7 +48,6 @@ void sys_nosound();
 
 void sys_clear();
 
-void print_help();
 void test_int_80h();
 void sys_putPixel(uint32_t hexColor, uint64_t x, uint64_t y);
 int sys_ticks_elapsed();
@@ -59,8 +58,8 @@ int sys_getWindowSize(int elem);
 
 void sys_getRegs();
 
-void* sys_malloc(uint64_t size);
-void sys_free(void* ptr);
+void *sys_malloc(uint64_t size);
+void sys_free(void *ptr);
 
 int64_t sys_exec(void *code, char **argv, int argc, char *name, uint8_t priority);
 
@@ -82,5 +81,4 @@ void sys_sem_close(uint64_t sem_id);
 
 void sys_yield();
 
-
-#endif //TPE_ARQUI_SYSCALLS_H
+#endif // TPE_ARQUI_SYSCALLS_H

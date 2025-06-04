@@ -90,6 +90,4 @@ void printInt(int num) {
     printf(buffer);
 }
 
-// void simplePrintf(char* str){
-//    for (int i=0; str[i]; i++) putchar(str[i]);
-// }
+

@@ -15,7 +15,7 @@
 #define YEAR 9
 
 static command commands[] = {
-    {"help            :  ", "Muestra la lista de comandos.", print_help},
+    // {"help            :  ", "Muestra la lista de comandos.", print_help},
     {"time            :  ", "Muestra la hora.", time},
     {"eliminator      :  ", "Ejecuta el juego eliminator.", eliminator},
     {"size_<1-5>      :  ", "cambia tamanio de letra (entre 1 a 5).", changeSize_1},
@@ -30,16 +30,16 @@ static command commands[] = {
 
 };
 
-void print_help() {
-    printf("Presiona left alt para guardar registros en cualquier momento\n");
-    printf("Comandos disponibles:\n");
-    for (int i = 0; i < sizeof(commands) / sizeof(command); i++) {
-        printf(commands[i].title);
-        printf(" : ");
-        printf(commands[i].desc);
-        printf("\n");
-    }
-}
+// void print_help() {
+//     printf("Presiona left alt para guardar registros en cualquier momento\n");
+//     printf("Comandos disponibles:\n");
+//     for (int i = 0; i < sizeof(commands) / sizeof(command); i++) {
+//         printf(commands[i].title);
+//         printf(" : ");
+//         printf(commands[i].desc);
+//         printf("\n");
+//     }
+// }
 
 void clear() {
     sys_clear();
@@ -75,7 +75,7 @@ void test_mem() {
 
 void test_proc() {
 
-    test_processes(14, NULL);
+    test_processes(1, NULL);
 }
 
 void test_prior() {

@@ -1,12 +1,12 @@
 #include "../include/stdlib.h"
 #include "../include/syscalls.h"
 #include "../include/string.h"
+#include <definitions.h>
 
 uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base);
 
 void putcharColoured(char c, uint64_t foreground, uint64_t background) {
-    char buf[1] = {c};
-    sys_write(1, buf, 1);
+    sys_write(STDOUT, &c, 1);
 }
 
 void putchar(char c) {
@@ -14,9 +14,9 @@ void putchar(char c) {
 }
 
 uint64_t getchar() {
-    char buf[1];
-    sys_read(0, buf, 1);
-    return buf[0];
+    char c;
+    sys_read(STDIN, &c, 1);
+    return c;
 }
 
 

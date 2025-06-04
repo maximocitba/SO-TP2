@@ -30,7 +30,7 @@
 #define SYS_UNBLOCK 19
 #define SYS_NICE 20
 #define SYS_GET_PID 21
-#define WAIT_PID 22
+#define SYS_WAIT_PID 22
 #define SYS_SEM_OPEN 23
 #define SYS_SEM_WAIT 24
 #define SYS_SEM_POST 25
@@ -81,7 +81,7 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
             b_free((void *)param_1);
             return 1;
         case SYS_EXEC:
-            return create_process(param_1, (char **)param_2, param_3, (char *)param_4, param_5, 0);
+            return create_process((function)param_1, (char **)param_2, param_3, (char *)param_4, param_5, 0);
         case SYS_KILL:
             return kill_process(param_1);
         case SYS_BLOCK:
@@ -93,8 +93,8 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
             return 1;
         case SYS_GET_PID:
             return get_current_pid();
-        case WAIT_PID: 
-            waitpid((uint32_t)param_1);
+        case SYS_WAIT_PID: 
+            waitpid(param_1);
             return 1;
         case SYS_SEM_OPEN:
             return sem_open(param_1, param_2);
