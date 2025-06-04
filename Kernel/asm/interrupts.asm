@@ -32,6 +32,7 @@ EXTERN irqDispatcher
 EXTERN exceptionDispatcher
 
 EXTERN int80_write
+EXTERN scheduler
 
 SECTION .text
 
@@ -232,7 +233,22 @@ picSlaveMask:
 
 ;8254 Timer (Timer Tick)
 _irq00Handler:
-	irqHandlerMaster 0
+    ;irq_handler 0
+	;caso especial para el scheduler
+
+    pushState
+	mov rdi, 0 ; pasaje de parametro
+	call irqDispatcher
+
+	mov rdi, rsp
+	call scheduler
+	mov rsp, rax
+
+	mov al, 0x20
+	out 0x20, al
+
+	popState
+	iretq
 
 ;Keyboard
 _irq01Handler:
@@ -310,7 +326,7 @@ create_process_stack_frame:
 	mov rdi, rdi		; code
     mov rsi, rdx     	; argv
     mov rdx, rcx     	; argc
-	push_state
+	pushState
 
     mov rax, rsp  
     mov rsp, r14

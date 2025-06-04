@@ -16,8 +16,8 @@ extern uint8_t endOfKernel;
 
 static const uint64_t PageSize = 0x1000;
 
-static void *const sampleCodeModuleAddress = (void *) 0x400000;
-static void *const sampleDataModuleAddress = (void *) 0x500000;
+static void *const sampleCodeModuleAddress = (void*)(uintptr_t)0x400000;
+static void *const sampleDataModuleAddress = (void*)(uintptr_t)0x500000;
 
 typedef int (*EntryPoint)();
 
@@ -53,13 +53,13 @@ void *initializeKernelBinary() {
 }
 
 int main() {
-    create_process((void*)sampleCodeModuleAddress, NULL, 0, "shell", 4, 1);
+    create_process((function)sampleCodeModuleAddress, NULL, 0, "shell", 14, 1);
 
     load_idt();
 
     // sys_registers();     // descomentar para ver registros del kernel
 
-    ((EntryPoint) sampleCodeModuleAddress)();
+    // ((EntryPoint) sampleCodeModuleAddress)();
 
     while (1);
 
