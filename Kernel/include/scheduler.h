@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <IO.h>
-#include <definitions.h>
+#include "../include/definitions.h"
 #include <process.h>
 
 typedef int (*function)(int argc, char **args);

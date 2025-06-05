@@ -3,6 +3,7 @@
 #include "syscall.h"
 #include <stdint.h>
 #include <syscalls.h>
+#include "../include/definitions.h"
 
 enum State { RUNNING,
     BLOCKED,
@@ -14,6 +15,7 @@ typedef struct P_rq {
 } p_rq;
 
 static void endless_loop_wrap() {
+    printf("[endless_loop_wrap] process with pid: %d started\n", sys_get_pid());
     endless_loop();
 }
 
@@ -35,7 +37,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
     while (wh--) {
         // Create max_processes processes
         for (rq = 0; rq < max_processes; rq++) {
-            p_rqs[rq].pid = sys_exec((void *)&endless_loop_wrap, argv_aux, 0, "test", 1);
+            p_rqs[rq].pid = sys_exec((void *)&endless_loop_wrap, NULL, 0, "test", low_medium);
 
             if (p_rqs[rq].pid == -1) {
                 printf("test_processes: ERROR creating process\n");
@@ -54,7 +56,6 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
 
             for (rq = 0; rq < max_processes; rq++) {
                 action = GetUniform(100) % 2;
-                // action = 0;
                 switch (action) {
                 case 0:
                     if (p_rqs[rq].state == RUNNING || p_rqs[rq].state == BLOCKED) {

@@ -2,7 +2,7 @@
 #define _create_process_h
 
 #include <stdint.h>
-#include "definitions.h"
+#include "../include/definitions.h"
 #include "linked_list.h"
 
 typedef struct process_t {

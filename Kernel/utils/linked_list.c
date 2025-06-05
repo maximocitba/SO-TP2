@@ -1,7 +1,9 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/linked_list.h"
 #include <stddef.h>
-#include <IO.h>
-#include <memman.h>
+#include "../include/IO.h"
+#include "../include/memman.h"
 
     typedef struct linked_list_cdt_t {
         node_t * head;
@@ -37,38 +39,39 @@ void add_node(linked_list_adt list, void * process) {
 }
 
 void remove_all_nodes(linked_list_adt list, void * process) {
-    node_t *prev = NULL;
-    node_t *current = list->head;
-    int removed = 0;
-
+    node_t * prev = NULL;
+    node_t * current = list->head;
+    
     while (current != NULL) {
-        node_t *next = current->next;
         if (current->process == process) {
+            node_t * next = current->next;
+            
             if (prev == NULL) {
+                // deleting from head
                 list->head = next;
             } else {
                 prev->next = next;
             }
+            
             if (current == list->tail) {
                 list->tail = prev;
             }
+            
             b_free(current);
             list->size--;
-            removed++;
-            // Do not advance prev
+            
+            current = next;  
         } else {
             prev = current;
+            current = current->next;
         }
-        current = next;
     }
+    
     if (list->size == 0) {
         list->head = NULL;
         list->tail = NULL;
     }
-   
 }
-
-
 void remove_node(linked_list_adt list, void * process) {
     node_t * prev = NULL;
     node_t * current = list->head;

@@ -19,6 +19,9 @@ static const uint64_t PageSize = 0x1000;
 static void *const sampleCodeModuleAddress = (void*)(uintptr_t)0x400000;
 static void *const sampleDataModuleAddress = (void*)(uintptr_t)0x500000;
 
+static void *const heap_start_address = (void*)(uintptr_t)0x1000000; 
+static void *const heap_end_address = (void *)(uintptr_t)0x2000000;
+
 typedef int (*EntryPoint)();
 
 
@@ -46,14 +49,14 @@ void *initializeKernelBinary() {
 
     clearBSS(&bss, &endOfKernel - &bss);
 
-    uint64_t size = (void *)(uintptr_t)0x2000000 - (void*)(uintptr_t)0x1000000;
-    b_init((void*)(uintptr_t)0x1000000, size);
+   uint64_t size = (uint64_t)heap_end_address - (uint64_t)heap_start_address;
+    b_init(heap_start_address, size);
     init_scheduler();
     return getStackBase();
 }
 
 int main() {
-    create_process((function)sampleCodeModuleAddress, NULL, 0, "shell", 14, 1);
+    create_process((function)sampleCodeModuleAddress, NULL, 0, "shell", high, 1);
 
     load_idt();
 

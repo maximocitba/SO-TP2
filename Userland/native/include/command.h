@@ -8,7 +8,7 @@ typedef struct {
 } command;
 
 void print_time();
-void print_help();
+// void print_help();
 
 void clear();
 void divideByZero();

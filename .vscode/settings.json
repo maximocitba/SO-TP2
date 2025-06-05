@@ -24,6 +24,7 @@
         "unistd.h": "c",
         "linked_list.h": "c",
         "functional": "c",
-        "semaphore.h": "c"
+        "semaphore.h": "c",
+        "definitions.h": "c"
     }
 }

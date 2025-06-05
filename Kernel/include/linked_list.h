@@ -31,4 +31,5 @@ void start_iterator(linked_list_adt list);
 uint8_t has_next(linked_list_adt list);
 void * get_next(linked_list_adt list);
 
+
 #endif // linkedlist_h

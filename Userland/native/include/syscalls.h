@@ -48,7 +48,7 @@ void sys_nosound();
 
 void sys_clear();
 
-void print_help();
+
 void test_int_80h();
 void sys_putPixel(uint32_t hexColor, uint64_t x, uint64_t y);
 int sys_ticks_elapsed();

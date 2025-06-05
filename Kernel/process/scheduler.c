@@ -20,11 +20,11 @@ uint8_t idle_rotation = 0;
 typedef struct scheduler_cdt {
     node_t *processes[MAX_PROCESSES];
     linked_list_adt blocked_process_list;
-    linked_list_adt process_list;
+    linked_list_adt process_list; // lista de procesos en ready menos idle
     uint16_t bg_process_list[MAX_PROCESSES];
     int current_pid;
     uint16_t next_unused_pid;
-    uint16_t remaining_processes;
+    uint16_t remaining_processes; // cantidad de procesos en ejecución con idle
     int32_t current_quantum;
     uint8_t num_bg_processes;
 } scheduler_cdt;
@@ -41,7 +41,7 @@ scheduler_adt init_scheduler() {
     }
 
     scheduler->remaining_processes = 0;
-    scheduler->next_unused_pid = 0;
+    scheduler->next_unused_pid = idle_pid;
     scheduler->current_pid = -1;
     scheduler->current_quantum = default_quantum;
 
@@ -93,6 +93,7 @@ void *scheduler(void *stack_pointer) {
         (current_process->state == running || current_process->state == ready)) {
         return stack_pointer;
     }
+
     switch (current_process->state) {
     case running:
         current_process->state = ready;
@@ -134,21 +135,23 @@ void *scheduler(void *stack_pointer) {
     return next_process->stack_pointer;
 }
 
-static uint32_t get_next_unused_pid(){
+static uint32_t get_next_unused_pid() {
     scheduler_adt scheduler = get_scheduler_adt();
 
-    if (scheduler->remaining_processes >= MAX_PROCESSES){
+    if (scheduler->remaining_processes >= MAX_PROCESSES) {
         printf("max processes reached\n");
         return -1;
     }
 
     int i = idle_pid + 1;
-    while(scheduler->processes[i] != NULL){
+    while (scheduler->processes[i] != NULL) {
         i++;
     }
     return i;
 }
+
 int32_t create_process(function code, char **args, int argc, char *name, uint8_t priority, uint8_t unkilliable) {
+
     priority = capped_priority(priority);
     scheduler_adt scheduler = get_scheduler_adt();
     if (scheduler->remaining_processes >= MAX_PROCESSES) {
@@ -172,11 +175,11 @@ int32_t create_process(function code, char **args, int argc, char *name, uint8_t
     }
 
     process_node->process = (void *)process;
-    if (process->pid != idle_pid) {
+    // if (process->pid != idle_pid) {
         for (int i = 0; i < process->priority; i++) {
             add_node(scheduler->process_list, (void *)process);
         }
-    }
+    // }
 
     scheduler->processes[process->pid] = process_node;
     scheduler->next_unused_pid = get_next_unused_pid();
@@ -252,21 +255,20 @@ int kill_process(uint32_t pid) {
         scheduler->num_bg_processes--;
     }
     scheduler->bg_process_list[pid] = foreground;
-    
+
     if (scheduler->processes[pid] == NULL) {
         printf("process not found\n");
         return -1;
     }
-    
-    
+
     process_t *process_to_kill = (process_t *)scheduler->processes[pid]->process;
     if (process_to_kill->unkilliable) {
         printf("failed to kill process. process is unkilliable\n");
         return -1;
     }
-    
+
     // remove_from_all_semaphores(pid);
-    
+
     if (process_to_kill->state == blocked) {
         // printf("\n_killing blocked process\n");
         remove_all_nodes(scheduler->blocked_process_list, (void *)process_to_kill);
@@ -274,7 +276,7 @@ int kill_process(uint32_t pid) {
         // printf("\n_killing running process\n");
         remove_all_nodes(scheduler->process_list, (void *)process_to_kill);
     }
-    
+
     // printf("\n_killing process\n");
     if (process_to_kill->parent_pid != idle_pid) {
     }
@@ -289,13 +291,19 @@ int kill_process(uint32_t pid) {
         }
     }
 
+ 
     scheduler->next_unused_pid = pid;
 
     free_process(process_to_kill);
     scheduler->remaining_processes--;
     process_to_kill->state = killed;
 
+
+
     yield();
+
+    scheduler->processes[pid]->process = NULL;
+    scheduler->processes[pid] = NULL;
     return 0;
 }
 

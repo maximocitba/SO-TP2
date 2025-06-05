@@ -40,3 +40,20 @@ void* memcpy(void* dest, const void* src, int n) {
     }
     return dest;
 }
+
+char *strchr(char* str, char c)
+{
+    while(*str != 0)
+    {
+        if(*str == c)
+            return str;
+        str++;
+    }
+    return 0;
+}
+
+char to_lower(char c) {
+    if (c >= 'A' && c <= 'Z')
+        return c + 32;
+    return c;
+}
