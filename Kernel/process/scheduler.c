@@ -176,6 +176,12 @@ int32_t create_process(function code, char **args, int argc, char *name, uint8_t
 
     init_process(process, scheduler->next_unused_pid, code, args, argc, name, priority, unkilliable);
 
+    if (scheduler->current_pid != -1 && process->pid != idle_pid) {
+        process->parent_pid = scheduler->current_pid;
+    } else {
+        process->parent_pid = idle_pid;
+    }
+
     node_t *process_node = b_alloc(sizeof(node_t));
     if (process_node == NULL) {
         printf("error creating process node\n");
@@ -305,6 +311,13 @@ int kill_process(uint32_t pid) {
     free_process(process_to_kill);
     scheduler->remaining_processes--;
     process_to_kill->state = killed;
+
+    if (process_to_kill->parent_pid != idle_pid) {
+        process_t *parent = get_process_by_pid(process_to_kill->parent_pid);
+        if (parent != NULL) {
+            remove_node(parent->children, process_to_kill);
+        }
+    }
 
     yield();
 

@@ -21,6 +21,7 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]);
 uint64_t test_sync(uint64_t argc, char *argv[]);
 
 
+
 //utils
 uint32_t get_uint();
 uint32_t GetUniform(uint32_t max);

@@ -14,7 +14,6 @@
 #define MONTH 8
 #define YEAR 9
 
-
 // void print_help() {
 //     printf("Presiona left alt para guardar registros en cualquier momento\n");
 //     printf("Comandos disponibles:\n");
@@ -69,8 +68,13 @@ void test_prior() {
     test_prio();
 }
 
-void test_syncro() {
-    test_sync(2, (char *[]){"2", "0"});
+void test_syncro(uint64_t argc, char *argv[]) {
+    if (argc != 2) {
+        printf("usage: test_synchro <n> <sem>");
+        return 0;
+    }
+    test_sync(argc, argv); //{n, use_sem, 0}
+    // my_test_sync();
 }
 
 void time() {

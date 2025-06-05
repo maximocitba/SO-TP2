@@ -46,7 +46,7 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
     printf("pid %d config: n=%d inc=%d sem=%d\n", sys_get_pid(), n, inc, use_sem);
 
    // printf("use_sem value = %d\n",use_sem);
-    if (use_sem==0) {
+    if (use_sem) {
       //  printf("enter use_sem value = %d\n",use_sem);
 
         int aux = sys_sem_open(SEM_ID, 1); 
@@ -59,26 +59,26 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
 
     uint64_t i;
     for (i = 0; i < n; i++) {
-        printf("pid %d iter %d/%d\n", sys_get_pid(), i+1, n);
-        if (use_sem==0) {
-            printf("pid %d sem: wait\n", sys_get_pid());
+        // printf("pid %d iter %d/%d\n", sys_get_pid(), i+1, n);
+        if (use_sem) {
+            // printf("pid %d sem: wait\n", sys_get_pid());
             sys_sem_wait(SEM_ID);
-            printf("pid %d sem: got\n", sys_get_pid());
+            // printf("pid %d sem: got\n", sys_get_pid());
         }
-        printf("pre inc global: %d\n", global);
+        // printf("pre inc global: %d\n", global);
         slowInc(&global, inc);
-        printf("post inc global: %d\n", global);
+        // printf("post inc global: %d\n", global);
 
-        if (use_sem==0) {
-            printf("pid %d sem: post\n", sys_get_pid());
+        if (use_sem) {
+            // printf("pid %d sem: post\n", sys_get_pid());
             sys_sem_post(SEM_ID);
         }
     }
 
-    if (use_sem==0) {
+    if (use_sem) {
         sys_sem_close(SEM_ID);
     }
-    printf("pid %d end\n", sys_get_pid());
+    // printf("pid %d end\n", sys_get_pid());
     return 0;
 }
 
@@ -99,24 +99,24 @@ uint64_t test_sync(uint64_t argc, char *argv[]) {
 
     uint64_t i;
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
-        printf("\n_creating pair %d:\n", i+1);
+        // printf("\n_creating pair %d:\n", i+1);
         pids[i] = sys_exec((void *)&my_process_inc, argv_dec, 3, "my_process_dec", 1);
-        printf("\n- dec pid: %d, global:%d \n", pids[i], global);
+        // printf("\n- dec pid: %d, global:%d \n", pids[i], global);
 
         pids[i + TOTAL_PAIR_PROCESSES] = sys_exec((void *)&my_process_inc, argv_inc, 3, "my_process_inc", 1);
-        printf("\n- inc pid: %d\n, global: %d", pids[i + TOTAL_PAIR_PROCESSES], global);
+        // printf("\n- inc pid: %d\n, global: %d", pids[i + TOTAL_PAIR_PROCESSES], global);
     }
 
-    printf("\n_waiting for processes\n");
+    // printf("\n_waiting for processes\n");
 
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
-        printf("wait dec : %d\n", pids[i]);
+        // printf("wait dec : %d\n", pids[i]);
         sys_waitpid(pids[i]);
-        printf("done\n");
+        // printf("done\n");
 
-        printf("wait inc : %d\n", pids[i + TOTAL_PAIR_PROCESSES]);
+        // printf("wait inc : %d\n", pids[i + TOTAL_PAIR_PROCESSES]);
         sys_waitpid(pids[i + TOTAL_PAIR_PROCESSES]);
-        printf("done\n");
+        // printf("done\n");
     }
     sys_sleep(5000);
 
@@ -125,3 +125,5 @@ uint64_t test_sync(uint64_t argc, char *argv[]) {
     printf("final global: %d\n", global);
     return 0;
 }
+
+

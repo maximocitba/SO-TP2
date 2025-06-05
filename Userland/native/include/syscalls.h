@@ -29,7 +29,6 @@
 #define SYS_SEM_POST 25
 #define SYS_SEM_CLOSE 26
 #define SYS_YIELD 27
-#define SYS_SLEEP 28
 
 #include <stdint.h>
 
