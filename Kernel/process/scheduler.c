@@ -58,6 +58,10 @@ int32_t get_next_ready_pid() {
 
     scheduler_adt scheduler = get_scheduler_adt();
 
+    if (scheduler->remaining_processes <= 1) {
+        return idle_pid; // No hay procesos, retorna el idle
+    }
+
     // si hay procesos en background, y ningun proceso foreground, idle deberia correr cada tanto.
     if (scheduler->remaining_processes - scheduler->num_bg_processes <= 1) {
         idle_rotation = (idle_rotation + 1) % 2;
@@ -96,8 +100,13 @@ void *scheduler(void *stack_pointer) {
 
     switch (current_process->state) {
     case running:
-        current_process->state = ready;
-        swap_to_last(scheduler->process_list, current_process);
+        if (current_process->pid != idle_pid) {
+            current_process->state = ready;
+            swap_to_last(scheduler->process_list, current_process);
+        } else {
+            // idle process should not be swapped to last
+            current_process->state = ready;
+        }
         break;
     case killed:
 
@@ -175,11 +184,11 @@ int32_t create_process(function code, char **args, int argc, char *name, uint8_t
     }
 
     process_node->process = (void *)process;
-    // if (process->pid != idle_pid) {
+    if (process->pid != idle_pid) {
         for (int i = 0; i < process->priority; i++) {
             add_node(scheduler->process_list, (void *)process);
         }
-    // }
+    }
 
     scheduler->processes[process->pid] = process_node;
     scheduler->next_unused_pid = get_next_unused_pid();
@@ -267,7 +276,7 @@ int kill_process(uint32_t pid) {
         return -1;
     }
 
-    // remove_from_all_semaphores(pid);
+    remove_from_all_semaphores(pid);
 
     if (process_to_kill->state == blocked) {
         // printf("\n_killing blocked process\n");
@@ -291,14 +300,11 @@ int kill_process(uint32_t pid) {
         }
     }
 
- 
     scheduler->next_unused_pid = pid;
 
     free_process(process_to_kill);
     scheduler->remaining_processes--;
     process_to_kill->state = killed;
-
-
 
     yield();
 

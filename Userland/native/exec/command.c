@@ -14,21 +14,6 @@
 #define MONTH 8
 #define YEAR 9
 
-static command commands[] = {
-    // {"help            :  ", "Muestra la lista de comandos.", print_help},
-    {"time            :  ", "Muestra la hora.", time},
-    {"eliminator      :  ", "Ejecuta el juego eliminator.", eliminator},
-    {"size_<1-5>      :  ", "cambia tamanio de letra (entre 1 a 5).", changeSize_1},
-    {"dividebyzero    :  ", "Muestra excepcion de division de 0.", divideByZero},
-    {"invalidopcode   :  ", "Muestra excepcion de codigo invalido.", invalidOpcode},
-    {"inforeg         :  ", "Muestra los registros guardados.", sys_getRegs},
-    {"clear           :  ", "Limpia toda la pantalla.", clear},
-    {"testmem         :  ", "Ejecuta el test de memoria.", test_mem},
-    {"testproc        :  ", "Ejecuta el test de procesos.", test_proc},
-    {"testprio        :  ", "Ejecuta el test de prioridades.", test_prior},
-    {"testsync        :  ", "Ejecuta el test de sincronizacion.", test_syncro},
-
-};
 
 // void print_help() {
 //     printf("Presiona left alt para guardar registros en cualquier momento\n");
@@ -85,7 +70,7 @@ void test_prior() {
 }
 
 void test_syncro() {
-    test_sync(2, (char *[]){"1000", "1"});
+    test_sync(2, (char *[]){"2", "0"});
 }
 
 void time() {

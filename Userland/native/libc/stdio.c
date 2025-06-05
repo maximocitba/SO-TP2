@@ -36,7 +36,7 @@ void scanf(const char * fmt, ...) {
 static void print_str(const char * str, uint64_t foreground, uint64_t background) {
     uint64_t i = 0;
     while (str[i]) {
-        putchar(str[i++]);
+        putcharColoured(str[i++], foreground, background);
     }
 }
 
@@ -48,10 +48,16 @@ uint64_t vprintf_color(const char * fmt, uint64_t foreground, uint64_t backgroun
         if (fmt[i] == '%') {
             char buf[MAX_BUF];
             switch (fmt[++i]) {
-                case 'd':
-                    itoa(va_arg(args, int), buf);
+                case 'd': {
+                    int val = va_arg(args, int);
+                    if (val < 0) {
+                        putcharColoured('-', foreground, background);
+                        val = -val;
+                    }
+                    itoa(val, buf);
                     print_str(buf, foreground, background);
                     break;
+                }
                 case 's':
                     print_str(va_arg(args, char *), foreground, background);
                     break;
@@ -62,7 +68,7 @@ uint64_t vprintf_color(const char * fmt, uint64_t foreground, uint64_t backgroun
                     break;
             }
         } else {
-            putchar(fmt[i]);
+            putcharColoured(fmt[i], foreground, background);
         }
         i++;
     }

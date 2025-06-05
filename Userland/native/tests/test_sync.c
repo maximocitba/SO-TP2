@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <syscalls.h>
 
-#define SEM_ID "sem"
+#define SEM_ID 0
 #define TOTAL_PAIR_PROCESSES 2
 
 int64_t global; // shared memory
@@ -21,60 +21,107 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
     int8_t inc;
     int8_t use_sem;
 
-    if (argc != 3)
-        return -1;
+     printf("\n_pid %d start (n=%s, inc=%s, sem=%s)\n", sys_get_pid(), argv[0], argv[1], argv[2]);
 
-    if ((n = satoi(argv[0])) <= 0)
+    if (argc != 3) {
+        printf("[error] invalid argument count: %d\n", argc);
         return -1;
-    if ((inc = satoi(argv[1])) == 0)
-        return -1;
-    if ((use_sem = satoi(argv[2])) < 0)
-        return -1;
+    }
 
-    if (use_sem)
-        if (!sys_sem_open(SEM_ID, 1)) {
-            printf("test_sync: ERROR opening semaphore\n");
+    if ((n = satoi(argv[0])) <= 0) {
+        printf("[error] invalid n value: %s\n", argv[0]);
+        return -1;
+    }
+
+    if ((inc = satoi(argv[1])) == 0) {
+        printf("[error] invalid increment value: %s\n", argv[1]);
+        return -1;
+    }
+
+    if ((use_sem = satoi(argv[2])) < 0) {
+        printf("[error] invalid semaphore flag: %s\n", argv[2]);
+        return -1;
+    }
+
+    printf("pid %d config: n=%d inc=%d sem=%d\n", sys_get_pid(), n, inc, use_sem);
+
+   // printf("use_sem value = %d\n",use_sem);
+    if (use_sem==0) {
+      //  printf("enter use_sem value = %d\n",use_sem);
+
+        int aux = sys_sem_open(SEM_ID, 1); 
+        
+        if ((aux ) == -1) {
+            printf("pid %d sem: open failed\n", sys_get_pid());
             return -1;
         }
+    }
 
     uint64_t i;
     for (i = 0; i < n; i++) {
-        if (use_sem)
+        printf("pid %d iter %d/%d\n", sys_get_pid(), i+1, n);
+        if (use_sem==0) {
+            printf("pid %d sem: wait\n", sys_get_pid());
             sys_sem_wait(SEM_ID);
+            printf("pid %d sem: got\n", sys_get_pid());
+        }
+        printf("pre inc global: %d\n", global);
         slowInc(&global, inc);
-        if (use_sem)
+        printf("post inc global: %d\n", global);
+
+        if (use_sem==0) {
+            printf("pid %d sem: post\n", sys_get_pid());
             sys_sem_post(SEM_ID);
+        }
     }
 
-    if (use_sem)
+    if (use_sem==0) {
         sys_sem_close(SEM_ID);
-
+    }
+    printf("pid %d end\n", sys_get_pid());
     return 0;
 }
 
-uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
+uint64_t test_sync(uint64_t argc, char *argv[]) {
     uint64_t pids[2 * TOTAL_PAIR_PROCESSES];
 
-    if (argc != 2)
-        return -1;
+    printf("\n=== test start (n=%s, sem=%s) ===\n", argv[0], argv[1]);
 
-    char *argvDec[] = {argv[0], "-1", argv[1], NULL};
-    char *argvInc[] = {argv[0], "1", argv[1], NULL};
+    if (argc != 2) {
+        printf("[error] invalid args: %d\n", argc);
+        return -1;
+    }
+
+    char *argv_dec[] = {argv[0], "-1", argv[1], NULL};
+    char *argv_inc[] = {argv[0], "1", argv[1], NULL};
 
     global = 0;
 
     uint64_t i;
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
-        pids[i] = sys_exec((void *)&my_process_inc, argvDec, 3, "my_process_dec", 1);
-        pids[i + TOTAL_PAIR_PROCESSES] = sys_exec((void *)&my_process_inc, argvInc, 3, "my_process_inc", 1);
+        printf("\n_creating pair %d:\n", i+1);
+        pids[i] = sys_exec((void *)&my_process_inc, argv_dec, 3, "my_process_dec", 1);
+        printf("\n- dec pid: %d, global:%d \n", pids[i], global);
+
+        pids[i + TOTAL_PAIR_PROCESSES] = sys_exec((void *)&my_process_inc, argv_inc, 3, "my_process_inc", 1);
+        printf("\n- inc pid: %d\n, global: %d", pids[i + TOTAL_PAIR_PROCESSES], global);
     }
+
+    printf("\n_waiting for processes\n");
 
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
+        printf("wait dec : %d\n", pids[i]);
         sys_waitpid(pids[i]);
+        printf("done\n");
+
+        printf("wait inc : %d\n", pids[i + TOTAL_PAIR_PROCESSES]);
         sys_waitpid(pids[i + TOTAL_PAIR_PROCESSES]);
+        printf("done\n");
     }
+    sys_sleep(5000);
 
-    printf("Final value: %d\n", global);
-
+    //waitpid(pid); todo: handle waitpid(-1) to wpid any child
+    printf("\n=== test end ===\n");
+    printf("final global: %d\n", global);
     return 0;
 }

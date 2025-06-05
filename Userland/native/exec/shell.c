@@ -1,35 +1,31 @@
 #include "../include/shell.h"
-#include "../include/syscalls.h"
 #include "../include/command.h"
 #include "../include/eliminator.h"
+#include "../include/sounds.h"
 #include "../include/stdio.h"
 #include "../include/stdlib.h"
 #include "../include/string.h"
-#include "../include/sounds.h"
-
-
+#include "../include/syscalls.h"
 
 #define MAX_BUF 1024
 
-
 command_t commands[] = {
-    {"help", "shows this help", (function) print_help},
-    {"clear", "clears the screen", (function) clear},
-    {"time", "shows the current time", (function) time},
-    {"testproc", "runs the process test", (function) test_proc},
-    {"testprio", "runs the priority test", (function) test_prior},
-    {"testsync", "runs the synchronization test", (function) test_syncro},
-    {"testmem", "runs the memory test", (function) test_mem},
-    {"dividebyzero", "shows a division by zero exception", (function) divideByZero},
-    {"invalidopcode", "shows an invalid opcode exception", (function) invalidOpcode},
-    {"inforeg", "shows the saved registers", (function) sys_getRegs},
-    {"eliminator", "runs the eliminator game", (function) eliminator},
-    {"size_1", "changes font size to 1", (function) changeSize_1},
-    {"size_2", "changes font size to 2", (function) changeSize_2},
-    {"size_3", "changes font size to 3", (function) changeSize_3},
-    {"size_4", "changes font size to 4", (function) changeSize_4},
-    {"size_5", "changes font size to 5", (function) changeSize_5}
-
+    {"help", "muestra esta ayuda", (function)print_help},
+    {"clear", "limpia la pantalla", (function)clear},
+    {"time", "muestra la hora actual", (function)time},
+    {"testproc", "ejecuta el test de procesos", (function)test_proc},
+    {"testprio", "ejecuta el test de prioridades", (function)test_prior},
+    {"testsync", "ejecuta el test de sincronizacion", (function)test_syncro},
+    {"testmem", "ejecuta el test de memoria", (function)test_mem},
+    {"dividebyzero", "muestra una excepcion de division por cero", (function)divideByZero},
+    {"invalidopcode", "muestra una excepcion de opcode invalido", (function)invalidOpcode},
+    {"inforeg", "muestra los registros guardados", (function)sys_getRegs},
+    {"eliminator", "ejecuta el juego eliminator", (function)eliminator},
+    {"size1", "cambia el tamanio de fuente a 1", (function)changeSize_1},
+    {"size2", "cambia el tamanio de fuente a 2", (function)changeSize_2},
+    {"size3", "cambia el tamanio de fuente a 3", (function)changeSize_3},
+    {"size4", "cambia el tamanio de fuente a 4", (function)changeSize_4},
+    {"size5", "cambia el tamanio de fuente a 5", (function)changeSize_5}
 };
 
 static void parse_buffer(char *buff, parsed_input_t *parsed);
@@ -46,7 +42,7 @@ void shell() {
     parsed_input_t parsed;
 
     while (1) {
-        printf_color("user", 0xcdff00, 0x000000);
+        printf_color("user@so", 0xcdff00, 0x000000);
         printf(":~$ ");
 
         int i = 0;
@@ -76,73 +72,80 @@ void shell() {
 }
 
 static void parse_buffer(char *buff, parsed_input_t *parsed) {
-    if (!buff || !parsed) return;
-    
+    if (!buff || !parsed)
+        return;
+
     memset(parsed, 0, sizeof(parsed_input_t));
-    
+
     int len = strlen(buff);
-    while (len > 0 && (buff[len-1] == ' ' || buff[len-1] == '\n')) {
+    while (len > 0 && (buff[len - 1] == ' ' || buff[len - 1] == '\n')) {
         buff[--len] = '\0';
     }
-    
-    if (len > 0 && buff[len-1] == '&') {
+
+    if (len > 0 && buff[len - 1] == '&') {
         parsed->is_bg = 1;
         buff[--len] = '\0';
-        while (len > 0 && buff[len-1] == ' ') {
+        while (len > 0 && buff[len - 1] == ' ') {
             buff[--len] = '\0';
         }
     }
-    
+
     char *cmd_str = buff;
     char *pipe_pos;
-    
+
     while (cmd_str && *cmd_str && parsed->cmd_count < max_cmds) {
-        while (*cmd_str == ' ') cmd_str++;
-        if (!*cmd_str) break;
-        
+        while (*cmd_str == ' ')
+            cmd_str++;
+        if (!*cmd_str)
+            break;
+
         pipe_pos = strchr(cmd_str, '|');
         if (pipe_pos) {
             *pipe_pos = '\0';
         }
-        
+
         command_input_t *current_cmd = &parsed->cmds[parsed->cmd_count];
-        
+
         char *token = cmd_str;
         char *next_token = NULL;
         int arg_count = 0;
 
-        while (*token == ' ') token++;
+        while (*token == ' ')
+            token++;
         next_token = strchr(token, ' ');
         if (next_token) {
             *next_token = '\0';
             next_token++;
         }
         current_cmd->cmd = token;
-        
+
         if (next_token) {
             token = next_token;
-            while (*token && arg_count < max_args - 1) { 
-                while (*token == ' ') token++;
-                if (!*token) break;
-                
+            while (*token && arg_count < max_args - 1) {
+                while (*token == ' ')
+                    token++;
+                if (!*token)
+                    break;
+
                 next_token = strchr(token, ' ');
                 if (next_token) {
                     *next_token = '\0';
                     next_token++;
                 }
-                
+
                 current_cmd->argv[arg_count++] = token;
-                
-                if (!next_token) break;
+
+                if (!next_token)
+                    break;
                 token = next_token;
             }
         }
-        
+
         current_cmd->argc = arg_count;
         current_cmd->argv[arg_count] = NULL;
-        
+
         parsed->cmd_count++;
-        
+
         if (pipe_pos) {
             cmd_str = pipe_pos + 1;
         } else {
@@ -152,52 +155,51 @@ static void parse_buffer(char *buff, parsed_input_t *parsed) {
 }
 
 static int execute_command(parsed_input_t *parsed) {
-    if (!parsed || parsed->cmd_count == 0) return 0;
+    if (!parsed || parsed->cmd_count == 0)
+        return 0;
 
     if (parsed->cmd_count == 1) {
         command_input_t *current = &parsed->cmds[0];
-        
+
         for (int i = 0; i < sizeof(commands) / sizeof(command_t); i++) {
             if (strcmp(commands[i].name, current->cmd) == 0) {
                 int pid;
-                
+
                 if (parsed->is_bg) {
-                    pid = sys_exec((void *)commands[i].cmd, current->argv, current->argc, 
-                             commands[i].name, DEFAULT_PRIORITY);
-                
+                    pid = sys_exec((void *)commands[i].cmd, current->argv, current->argc,
+                        commands[i].name, DEFAULT_PRIORITY);
+
                     sys_block(pid);
                     // change_process_fd(pid, STDIN, DEV_NULL);
                     // set_bg(pid);
                     sys_unblock(pid);
                     printf("[%d] running in background\n", pid);
                 } else {
-                    pid = sys_exec((void *)commands[i].cmd, current->argv, current->argc, 
-                             commands[i].name, DEFAULT_PRIORITY);
+                    pid = sys_exec((void *)commands[i].cmd, current->argv, current->argc,
+                        commands[i].name, DEFAULT_PRIORITY);
 
-                    printf("Executing '%s' with PID %d\n", current->cmd, pid);
-                    // test_proc();
                     sys_waitpid(pid);
                 }
                 return 0;
             }
         }
-        printf("'%s' command not found\n", current->cmd);
+        printf("'%s' comando no encontrado, intenta con 'help'\n", current->cmd);
         return 0;
     }
 
     // uint16_t pipe_id = create_pipe();
 
     // int pids[max_cmds] = {0};
-    
+
     // for (int i = 0; i < parsed->cmd_count; i++) {
     //     command_input_t *current = &parsed->cmds[i];
     //     int found = 0;
     //     for (int j = 0; j < sizeof(commands) / sizeof(command_t); j++) {
     //         if (strcmp(commands[j].name, current->cmd) == 0) {
-    //             pids[i] = exec((void *)commands[j].cmd, current->argv, current->argc, 
+    //             pids[i] = exec((void *)commands[j].cmd, current->argv, current->argc,
     //                          commands[j].name, DEFAULT_PRIORITY);
     //             block(pids[i]);
-                
+
     //             if (i == 0) {
     //                 open_pipe(pids[i], pipe_id, write_mode);
     //                 change_process_fd(pids[i], STDOUT, pipe_id);
@@ -221,20 +223,19 @@ static int execute_command(parsed_input_t *parsed) {
     // for (int i = 0; i < parsed->cmd_count; i++) {
     //     unblock(pids[i]);
     // }
-    
+
     // if (!parsed->is_bg) {
     //     waitpid(pids[0]);
     //     close_pipe_by_pid(pids[0], pipe_id);
     //     waitpid(pids[1]);
     //     close_pipe_by_pid(pids[1], pipe_id);
-    // } 
-   
+    // }
+
     return 0;
 }
 
-
 void printHeader() {
-    printf_color("Bienvenido a la Shell!\n", 0xcdff00, 0x000000);
+    printf("Bienvenido a la Shell!\n");
     printf("Ejecuta 'help' para ver una lista de comandos.\n");
     return;
 }
@@ -253,10 +254,10 @@ void printHeader() {
 
 int print_help() {
 
-    printf("command_t: description\n");
+    printf("comando:\t descripccion\n");
     int size = sizeof(commands) / sizeof(command_t);
     for (int i = 1; i < size; i++) {
-        printf("%s: %s", commands[i].name, commands[i].description);
+        printf("%s:\t %s", commands[i].name, commands[i].description);
         if (i < size - 1) {
             putchar('\n');
         }

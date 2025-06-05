@@ -9,6 +9,10 @@ void timer_handler();
 int ticks_elapsed();
 int seconds_elapsed();
 
+
+void hlt();
+void sleepms(uint64_t ms);
+
 #define SECONDS 00
 #define MINUTES 02
 #define HOURS 04

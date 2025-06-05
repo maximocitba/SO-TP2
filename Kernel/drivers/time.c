@@ -31,3 +31,14 @@ uint8_t sys_getTime(int descriptor) {
     uint8_t toReturn = getRTC(descriptor);
     return getFormat(toReturn);
 }
+
+void sleepms(uint64_t millis) {
+    uint64_t start = ticks;
+    while (ticks - start < millis / 51) {
+        _hlt();
+    }
+}
+
+void hlt() {
+    _hlt();
+}

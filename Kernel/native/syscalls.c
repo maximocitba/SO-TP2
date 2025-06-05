@@ -7,6 +7,7 @@
 #include "memman.h"
 #include "scheduler.h"
 #include "../include/semaphore.h"
+#include "../include/time.h"
 
 #define SYS_HLT 0
 #define SYS_SOUND 1
@@ -37,6 +38,7 @@
 #define SYS_SEM_CLOSE 26
 #define SYS_YIELD 27
 
+
 uint64_t registers[18] = {0};
 
 uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_t param_3, uint64_t param_4, uint64_t param_5) {
@@ -48,7 +50,11 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
             nosound();
             return 1;
         case SYS_WRITE:
-            sys_write(param_1, param_2, param_3);
+            if (param_4 != 0) {
+                sys_write_color(param_1, param_2, param_3, param_4);
+            } else {
+                sys_write(param_1, param_2, param_3);
+            }
             return 1;
         case SYS_READ:
             return sys_read(param_1, param_2, param_3);
@@ -110,6 +116,8 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
         case SYS_YIELD:
             yield();
             return 1;
+        case SYS_SLEEP:
+            sleepms(param_1);
     }
     return 0;
 }

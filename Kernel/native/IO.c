@@ -49,8 +49,8 @@ static char videoModeOn = 0;
 
 
 // Funciones que manejan stdin, stdout y stderr
-void putOut(char c){
-    putCharColoured(c, 0x00ffffff, BG_COLOR);
+void putOut(char c, uint64_t foreground) {
+    putCharColoured(c, foreground, BG_COLOR);
 }
 
 
@@ -74,12 +74,24 @@ void clearIn(){
 }
 
 
+void sys_write_color(int fd, const char* buf, int count, uint64_t foreground) {
+    if (fd == 1) { // stdout
+        for (int i = 0; i < count; i++) {
+            putOut(buf[i], foreground);
+        }
+    } else if (fd == 2) { // stderr
+        for (int i = 0; i < count; i++) {
+            putErr(buf[i]);
+        }
+    }
+}
+
 
 // inspirado en la función de la API de Linux
-void sys_write(int fd, const char* buf, int count){
+void sys_write(int fd, const char* buf, int count) {
     if (fd==1){
         for(int i=0; i<count; i++){
-            putOut(buf[i]);
+            putOut(buf[i], 0xFFFFFF); // por defecto el foreground es blanco
         }
     }
     if (fd==2){

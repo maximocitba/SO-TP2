@@ -29,6 +29,7 @@
 #define SYS_SEM_POST 25
 #define SYS_SEM_CLOSE 26
 #define SYS_YIELD 27
+#define SYS_SLEEP 28
 
 #include <stdint.h>
 
@@ -37,11 +38,11 @@ extern uint64_t syscall(uint64_t id, uint64_t par1, void * par2, uint64_t par3, 
 void sys_hlt();
 
 int sys_read(int fd, char * buf, int count);
-void sys_write(int fd, char* buf, int count);
+void sys_write(int fd, char* buf, int count, uint64_t foreground);
 
 uint64_t sys_time(int d);
 
-void sys_sleep();
+void sys_sleep(uint64_t millis);
 
 void sys_sound(int frec);
 void sys_nosound();
@@ -81,6 +82,7 @@ void sys_sem_post(uint64_t sem_id);
 void sys_sem_close(uint64_t sem_id);
 
 void sys_yield();
+
 
 
 #endif //TPE_ARQUI_SYSCALLS_H

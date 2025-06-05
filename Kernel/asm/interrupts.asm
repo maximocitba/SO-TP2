@@ -348,7 +348,6 @@ acquire:
 release:
     mov DWORD [rdi], 1  ; Set to unlocked
     ret
-
 	
 SECTION .bss
 	aux resq 1

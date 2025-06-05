@@ -9,16 +9,16 @@ int sys_read(int fd, char *buf, int count) {
     return syscall(SYS_READ, fd, buf, count, 0, 0);
 }
 
-void sys_write(int fd, char *buf, int count) {
-    syscall(SYS_WRITE, fd, buf, count, 0, 0);
+void sys_write(int fd, char *buf, int count, uint64_t foreground) {
+    syscall(SYS_WRITE, fd, buf, count, foreground, 0);
 }
 
 uint64_t sys_time(int d) {
     return syscall(SYS_TIME, d, 0, 0, 0, 0);
 }
 
-void sys_sleep() {
-    syscall(SYS_SLEEP, 0, 0, 0, 0, 0);
+void sys_sleep(uint64_t millis) {
+    syscall(SYS_SLEEP, millis, 0, 0, 0, 0);
 }
 
 void sys_sound(int frec) {
