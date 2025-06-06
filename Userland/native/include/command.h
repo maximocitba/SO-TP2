@@ -24,6 +24,8 @@ void test_proc();
 void test_prior();
 void test_syncro();
 
+
+
 //para excepciones (buscan en Assembler)
 extern void runInvalidOpcodeException(void);
 extern void runZeroDivisionException(void);

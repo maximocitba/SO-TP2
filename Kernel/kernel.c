@@ -4,6 +4,7 @@
 #include <idtLoader.h>
 #include <memman.h>
 #include <scheduler.h>
+#include <pipes.h>
 
 extern void test_int_80h();
 
@@ -52,6 +53,7 @@ void *initializeKernelBinary() {
    uint64_t size = (uint64_t)heap_end_address - (uint64_t)heap_start_address;
     b_init(heap_start_address, size);
     init_scheduler();
+    init_pipe_manager();
     return getStackBase();
 }
 

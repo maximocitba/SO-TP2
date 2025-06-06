@@ -32,6 +32,7 @@ typedef struct {
 
 void shell();
 int print_help();
+int print_hola();
 void printHeader();
 // void execute(const char *inputBuffer);
 

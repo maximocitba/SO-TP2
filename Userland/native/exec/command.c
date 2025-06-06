@@ -70,7 +70,7 @@ void test_prior() {
 
 void test_syncro(uint64_t argc, char *argv[]) {
     if (argc != 2) {
-        printf("usage: test_synchro <n> <sem>");
+        printf("usage: test_synchro <n> <sem>\n");
         return 0;
     }
     test_sync(argc, argv); //{n, use_sem, 0}

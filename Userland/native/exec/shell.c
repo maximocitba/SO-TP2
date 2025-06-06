@@ -11,6 +11,7 @@
 
 command_t commands[] = {
     {"help", "muestra esta ayuda", (function)print_help},
+    {"hola", "saluda", (function)print_hola},
     {"clear", "limpia la pantalla", (function)clear},
     {"time", "muestra la hora actual", (function)time},
     {"testproc", "ejecuta el test de procesos", (function)test_proc},
@@ -257,5 +258,10 @@ int print_help() {
         }
     }
     putchar('\n');
+    return 0;
+}
+
+int print_hola() {
+    printf("Hola, bienvenido a la shell!\n");
     return 0;
 }
