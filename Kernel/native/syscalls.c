@@ -8,6 +8,7 @@
 #include "scheduler.h"
 #include "../include/semaphore.h"
 #include "../include/time.h"
+#include "../include/pipes.h"
 
 #define SYS_HLT 0
 #define SYS_SOUND 1
@@ -37,6 +38,14 @@
 #define SYS_SEM_POST 25
 #define SYS_SEM_CLOSE 26
 #define SYS_YIELD 27
+#define SYS_CREATE_PIPE 28
+#define SYS_OPEN_PIPE 29
+#define SYS_CLOSE_PIPE 30
+#define SYS_WRITE_PIPE 31
+#define SYS_READ_PIPE 32
+#define SYS_CHANGE_PROCESS_FD 33
+#define SYS_SET_BG_PROCESS 34
+#define SYS_CLOSE_PIPE_BY_PID 35
 
 
 uint64_t registers[18] = {0};
@@ -118,6 +127,25 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
             return 1;
         case SYS_SLEEP:
             sleepms(param_1);
+            return 1;
+        case SYS_CREATE_PIPE:
+            return create_pipe();
+        case SYS_OPEN_PIPE:
+            return open_pipe((uint16_t)param_1, (uint16_t)param_2, (uint8_t)param_3);
+        case SYS_CLOSE_PIPE:
+            return close_pipe((uint16_t)param_1);
+        case SYS_WRITE_PIPE:
+            return write_pipe((uint16_t)param_1, (uint16_t)param_2, (const char *)param_3, (uint16_t)param_4);
+        case SYS_READ_PIPE:
+            return read_pipe((uint16_t)param_1, (uint16_t)param_2, (char *)param_3, (uint16_t)param_4);
+        case SYS_CHANGE_PROCESS_FD:
+            return change_process_fd((uint32_t)param_1, (uint16_t)param_2, (int16_t)param_3);
+        case SYS_SET_BG_PROCESS:
+            set_bg_process((uint32_t)param_1);
+            return 1;
+        case SYS_CLOSE_PIPE_BY_PID:
+            return close_pipe_by_pid((uint16_t)param_1, (uint16_t)param_2);
+        
     }
     return 0;
 }

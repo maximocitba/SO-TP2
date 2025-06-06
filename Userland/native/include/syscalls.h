@@ -29,6 +29,14 @@
 #define SYS_SEM_POST 25
 #define SYS_SEM_CLOSE 26
 #define SYS_YIELD 27
+#define SYS_CREATE_PIPE 28
+#define SYS_OPEN_PIPE 29
+#define SYS_CLOSE_PIPE 30
+#define SYS_WRITE_PIPE 31
+#define SYS_READ_PIPE 32
+#define SYS_CHANGE_PROCESS_FD 33
+#define SYS_SET_BG_PROCESS 34
+#define SYS_CLOSE_PIPE_BY_PID 35
 
 #include <stdint.h>
 
@@ -82,6 +90,20 @@ void sys_sem_close(uint64_t sem_id);
 
 void sys_yield();
 
+uint16_t sys_create_pipe();
 
+uint16_t sys_open_pipe(uint16_t pid, uint16_t pipe_id, uint8_t mode);
+
+uint16_t sys_close_pipe(uint16_t pipe_id);
+
+uint16_t sys_write_pipe(uint16_t pid, uint16_t pipe_id, char * data, uint16_t size);
+
+uint16_t sys_read_pipe(uint16_t pid, uint16_t pipe_id, char * data, uint16_t size);
+
+uint16_t sys_change_process_fd(uint32_t pid, uint16_t fd_index, int16_t new_fd);
+
+void sys_set_bg_process(uint32_t pid);
+
+uint16_t sys_close_pipe_by_pid(uint16_t pid, uint16_t pipe_id);
 
 #endif //TPE_ARQUI_SYSCALLS_H

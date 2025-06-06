@@ -113,3 +113,35 @@ void sys_sem_close(uint64_t id) {
 void sys_yield() {
     syscall(SYS_YIELD, 0, 0, 0, 0, 0);
 }
+
+uint16_t sys_create_pipe() {
+    return syscall(SYS_CREATE_PIPE, 0, 0, 0, 0, 0);
+}
+
+uint16_t sys_open_pipe(uint16_t pid, uint16_t pipe_id, uint8_t mode) {
+    return syscall(SYS_OPEN_PIPE, pid, pipe_id, mode, 0, 0);
+}
+
+uint16_t sys_close_pipe(uint16_t pipe_id) {
+    return syscall(SYS_CLOSE_PIPE, pipe_id, 0, 0, 0, 0);
+}
+
+uint16_t sys_write_pipe(uint16_t pid, uint16_t pipe_id, char *data, uint16_t size) {
+    return syscall(SYS_WRITE_PIPE, pid, pipe_id, (uint64_t)data, size, 0);
+}
+
+uint16_t sys_read_pipe(uint16_t pid, uint16_t pipe_id, char *data, uint16_t size) {
+    return syscall(SYS_READ_PIPE, pid, pipe_id, (uint64_t)data, size, 0);
+}
+
+uint16_t sys_change_process_fd(uint32_t pid, uint16_t fd_index, int16_t new_fd) {
+    return syscall(SYS_CHANGE_PROCESS_FD, pid, fd_index, new_fd, 0, 0);
+}
+
+void sys_set_bg_process(uint32_t pid) {
+    syscall(SYS_SET_BG_PROCESS, pid, 0, 0, 0, 0);
+}
+
+uint16_t sys_close_pipe_by_pid(uint16_t pid, uint16_t pipe_id) {
+    return syscall(SYS_CLOSE_PIPE_BY_PID, pid, pipe_id, 0, 0, 0);
+}
