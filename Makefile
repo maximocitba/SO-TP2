@@ -1,4 +1,4 @@
-all:  bootloader kernel userland toolchain image
+all:  toolchain bootloader kernel userland image
 
 toolchain:
 	cd Toolchain; make all
@@ -19,17 +19,12 @@ Toolchain/ModulePacker/mp.bin:
 	cd Toolchain/ModulePacker; make all
 
 clean:
+	cd Toolchain; make clean
 	cd Bootloader; make clean
 	cd Image; make clean
 	cd Kernel; make clean
 	cd Userland; make clean
-	cd Toolchain; make clean
-	rm -rf Userland/native/tests/*.o
 	# Remove ELF and BIN files from the project root
 	rm -f *.elf *.bin
-	# Clean kernel directory
-	rm -f Kernel/*.elf
-	# Clean userland directory
-	rm -f Userland/*.elf Userland/*.bin
 
 .PHONY: bootloader image collections kernel userland all clean
