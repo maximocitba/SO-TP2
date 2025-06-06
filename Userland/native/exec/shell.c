@@ -158,6 +158,10 @@ static int execute_command(parsed_input_t *parsed) {
     if (!parsed || parsed->cmd_count == 0)
         return 0;
 
+    printf("Cantidad de cmds: %d\n", parsed->cmd_count);
+    printf("Ejecutando comandos: %s y %s\n", parsed->cmds[0].cmd, parsed->cmd_count > 1 ? parsed->cmds[1].cmd : "NULL");
+
+
     if (parsed->cmd_count == 1) {
         command_input_t *current = &parsed->cmds[0];
 
@@ -170,8 +174,8 @@ static int execute_command(parsed_input_t *parsed) {
                         commands[i].name, DEFAULT_PRIORITY);
 
                     sys_block(pid);
-                    // change_process_fd(pid, STDIN, DEV_NULL);
-                    // set_bg(pid);
+                    sys_change_process_fd(pid, STDIN, DEV_NULL);
+                    sys_set_bg_process(pid);
                     sys_unblock(pid);
                     printf("[%d] running in background\n", pid);
                 } else {
@@ -187,49 +191,49 @@ static int execute_command(parsed_input_t *parsed) {
         return 0;
     }
 
-    // uint16_t pipe_id = create_pipe();
+    uint16_t pipe_id = sys_create_pipe();
 
-    // int pids[max_cmds] = {0};
+    int pids[max_cmds] = {0};
 
-    // for (int i = 0; i < parsed->cmd_count; i++) {
-    //     command_input_t *current = &parsed->cmds[i];
-    //     int found = 0;
-    //     for (int j = 0; j < sizeof(commands) / sizeof(command_t); j++) {
-    //         if (strcmp(commands[j].name, current->cmd) == 0) {
-    //             pids[i] = exec((void *)commands[j].cmd, current->argv, current->argc,
-    //                          commands[j].name, DEFAULT_PRIORITY);
-    //             block(pids[i]);
+    for (int i = 0; i < parsed->cmd_count; i++) {
+        command_input_t *current = &parsed->cmds[i];
+        int found = 0;
+        for (int j = 0; j < sizeof(commands) / sizeof(command_t); j++) {
+            if (strcmp(commands[j].name, current->cmd) == 0) {
+                pids[i] = sys_exec((void *)commands[j].cmd, current->argv, current->argc,
+                             commands[j].name, DEFAULT_PRIORITY);
+                sys_block(pids[i]);
 
-    //             if (i == 0) {
-    //                 open_pipe(pids[i], pipe_id, write_mode);
-    //                 change_process_fd(pids[i], STDOUT, pipe_id);
-    //             }
+                if (i == 0) {
+                    sys_open_pipe(pids[i], pipe_id, write_mode);
+                    sys_change_process_fd(pids[i], STDOUT, pipe_id);
+                }
 
-    //             if (i == 1) {
-    //                 open_pipe(pids[i], pipe_id, read_mode);
-    //                 change_process_fd(pids[i], STDIN, pipe_id);
-    //             }
+                if (i == 1) {
+                    sys_open_pipe(pids[i], pipe_id, read_mode);
+                    sys_change_process_fd(pids[i], STDIN, pipe_id);
+                }
 
-    //             found = 1;
-    //             break;
-    //         }
-    //     }
-    //     if (!found) {
-    //         printf("'%s' command not found", current->cmd);
-    //         return 0;
-    //     }
-    // }
+                found = 1;
+                break;
+            }
+        }
+        if (!found) {
+            printf("'%s' command not found", current->cmd);
+            return 0;
+        }
+    }
 
-    // for (int i = 0; i < parsed->cmd_count; i++) {
-    //     unblock(pids[i]);
-    // }
+    for (int i = 0; i < parsed->cmd_count; i++) {
+        sys_unblock(pids[i]);
+    }
 
-    // if (!parsed->is_bg) {
-    //     waitpid(pids[0]);
-    //     close_pipe_by_pid(pids[0], pipe_id);
-    //     waitpid(pids[1]);
-    //     close_pipe_by_pid(pids[1], pipe_id);
-    // }
+    if (!parsed->is_bg) {
+        sys_waitpid(pids[0]);
+        sys_close_pipe_by_pid(pids[0], pipe_id);
+        sys_waitpid(pids[1]);
+        sys_close_pipe_by_pid(pids[1], pipe_id);
+    }
 
     return 0;
 }
@@ -240,17 +244,7 @@ void printHeader() {
     return;
 }
 
-// void execute(const char *inputBuffer) {
-//     for (int i = 0; i < 16 ; i++)
-//     {
-//         if (strcmp(inputBuffer, commands[i]) == 0)
-//         {
-//             commands_functions[i]();
-//             return;
-//         }
-//     }
-//     printf("Invalid command, try again.\n");
-// }
+
 
 int print_help() {
 

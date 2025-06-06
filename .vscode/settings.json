@@ -25,6 +25,7 @@
         "linked_list.h": "c",
         "functional": "c",
         "semaphore.h": "c",
-        "definitions.h": "c"
+        "definitions.h": "c",
+        "pipes.h": "c"
     }
 }
