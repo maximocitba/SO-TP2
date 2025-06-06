@@ -7,7 +7,15 @@ SOURCES_ASM=$(wildcard asm/*.asm)
 SOURCES_DRIVERS=$(wildcard drivers/*.c)
 SOURCES_NATIVE=$(wildcard native/*.c)
 SOURCES_IDT=$(wildcard idt/*.c)
-SOURCES_MEMORY=$(wildcard memory/*.c)
+
+MEMMAN_IMPL ?= memman_noob
+SOURCES_MEMORY = memory/$(MEMMAN_IMPL).c
+
+# Allow override from command line
+ifeq ($(origin KERNEL_MEMMAN_IMPL), command line)
+    MEMMAN_IMPL := $(KERNEL_MEMMAN_IMPL)
+endif
+
 SOURCES_PROCESS=$(wildcard process/*.c)
 SOURCES_UTILS=$(wildcard utils/*.c)
 SOURCES_SYNC=$(wildcard sync/*.c)
