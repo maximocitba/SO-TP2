@@ -24,7 +24,11 @@ void test_proc();
 void test_prior();
 void test_syncro();
 
-
+void ps_command();
+int loop_command(int argc, char **argv);
+int kill_command(int argc, char **argv);
+int nice_command(int argc, char **argv);
+int block_command(int argc, char **argv);
 
 //para excepciones (buscan en Assembler)
 extern void runInvalidOpcodeException(void);

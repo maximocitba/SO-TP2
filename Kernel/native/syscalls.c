@@ -46,6 +46,8 @@
 #define SYS_CHANGE_PROCESS_FD 33
 #define SYS_SET_BG_PROCESS 34
 #define SYS_CLOSE_PIPE_BY_PID 35
+#define SYS_GET_ALL_PROCESSES_INFO 36
+#define SYS_TOGGLE_BLOCK_STATE 37
 
 
 uint64_t registers[18] = {0};
@@ -145,7 +147,10 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
             return 1;
         case SYS_CLOSE_PIPE_BY_PID:
             return close_pipe_by_pid((uint16_t)param_1, (uint16_t)param_2);
-        
+        case SYS_GET_ALL_PROCESSES_INFO:
+            return get_all_processes_info((ps_info_t*)param_1, (int)param_2);
+        case SYS_TOGGLE_BLOCK_STATE:
+            return toggle_process_block_state((uint32_t)param_1);
     }
     return 0;
 }

@@ -37,8 +37,11 @@
 #define SYS_CHANGE_PROCESS_FD 33
 #define SYS_SET_BG_PROCESS 34
 #define SYS_CLOSE_PIPE_BY_PID 35
+#define SYS_GET_ALL_PROCESSES_INFO 36
+#define SYS_TOGGLE_BLOCK_STATE 37
 
 #include <stdint.h>
+#include "../include/definitions.h"
 
 extern uint64_t syscall(uint64_t id, uint64_t par1, void * par2, uint64_t par3, uint64_t par4, uint64_t par5);
 
@@ -105,5 +108,8 @@ uint16_t sys_change_process_fd(uint32_t pid, uint16_t fd_index, int16_t new_fd);
 void sys_set_bg_process(uint32_t pid);
 
 uint16_t sys_close_pipe_by_pid(uint16_t pid, uint16_t pipe_id);
+
+int sys_get_all_processes_info(ps_info_t* buffer, int max_len);
+int sys_toggle_block_state(uint32_t pid);
 
 #endif //TPE_ARQUI_SYSCALLS_H

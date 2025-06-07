@@ -145,27 +145,28 @@ void print_number(int number) {
 
 
 void pointer_to_string(void *ptr, char *buffer, size_t buffer_size) {
-    
-    memset(buffer, 0, buffer_size);
-    
-    if (buffer_size < 20) {
-        return; 
+    const size_t required_hex_digits = sizeof(uintptr_t) * 2; // e.g., 16 for 64-bit
+    const size_t required_total_size = 2 /* "0x" */ + required_hex_digits + 1 /* '\0' */;
+
+    if (buffer_size < required_total_size) {
+        if (buffer_size > 0) {
+            buffer[0] = '\0'; // Try to at least null-terminate
+        }
+        return;
     }
 
     uintptr_t address = (uintptr_t)ptr;
-
     int index = 0;
-    buffer[index++] = '0';   
-    buffer[index++] = 'x';   
+    buffer[index++] = '0';
+    buffer[index++] = 'x';
 
-    for (int i = 8; i >= 0; i--) {
-        int digit = (address >> (i * 4)) & 0xf; 
-        if (digit < 10) {
-            buffer[index++] = '0' + digit; 
+    for (int i = required_hex_digits - 1; i >= 0; i--) {
+        uintptr_t nibble_value = (address >> (i * 4)) & 0xF;
+        if (nibble_value < 10) {
+            buffer[index++] = '0' + nibble_value;
         } else {
-            buffer[index++] = 'a' + (digit - 10); 
+            buffer[index++] = 'a' + (nibble_value - 10); // Using lowercase 'a'-'f'
         }
     }
-
-    buffer[index] = '\0';
+    buffer[index] = '\0'; // Null-terminate
 }

@@ -8,6 +8,7 @@
 #include <memman.h>
 #include <process.h>
 #include <semaphore.h>
+#include <string.h> // Added for strlen and memcpy
 
 #define idle_pid 0
 #define default_quantum 5
@@ -430,6 +431,42 @@ void set_bg_process(uint32_t pid) {
     ((process_t *)scheduler->processes[pid]->process)->fg = background;
     scheduler->bg_process_list[pid] = background;
     scheduler->num_bg_processes++;
+}
+
+int get_all_processes_info(ps_info_t* buffer, int max_len) {
+    scheduler_adt scheduler = get_scheduler_adt();
+    int count = 0;
+    for (int i = 0; i < MAX_PROCESSES && count < max_len; i++) {
+        if (scheduler->processes[i] != NULL && scheduler->processes[i]->process != NULL) {
+            process_t* p = (process_t*)scheduler->processes[i]->process;
+            buffer[count].pid = p->pid;
+            buffer[count].priority = p->priority;
+            buffer[count].state = p->state;
+            memcpy(buffer[count].name, p->name, strlen(p->name) + 1);
+            pointer_to_string(p->stack_pointer, buffer[count].stack_pointer_str, MAX_PTR_STR_LEN);
+            pointer_to_string(p->stack_base, buffer[count].base_pointer_str, MAX_PTR_STR_LEN);
+            buffer[count].fg = p->fg;
+            buffer[count].parent_pid = p->parent_pid;
+            count++;
+        }
+    }
+    return count;
+}
+
+int toggle_process_block_state(uint32_t pid) {
+    scheduler_adt scheduler = get_scheduler_adt();
+    if (pid == idle_pid || scheduler->processes[pid] == NULL || scheduler->processes[pid]->process == NULL) {
+        return -1; // Cannot block/unblock idle or non-existent process
+    }
+
+    process_t* p = (process_t*)scheduler->processes[pid]->process;
+
+    if (p->state == blocked) {
+        return unblock_process(pid);
+    } else if (p->state == ready || p->state == running) {
+        return block_process(pid);
+    }
+    return -1; // Process is in a state that cannot be toggled (e.g., killed)
 }
 
 #undef capped_priority

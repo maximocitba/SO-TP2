@@ -26,7 +26,12 @@ command_t commands[] = {
     {"size2", "cambia el tamanio de fuente a 2", (function)changeSize_2},
     {"size3", "cambia el tamanio de fuente a 3", (function)changeSize_3},
     {"size4", "cambia el tamanio de fuente a 4", (function)changeSize_4},
-    {"size5", "cambia el tamanio de fuente a 5", (function)changeSize_5}
+    {"size5", "cambia el tamanio de fuente a 5", (function)changeSize_5},
+    {"ps", "muestra los procesos actuales", (function)ps_command},
+    {"loop", "imprime un saludo cada 30 segundos", (function)loop_command},
+    {"kill", "mata un proceso por ID", (function)kill_command},
+    {"nice", "cambia la prioridad de un proceso", (function)nice_command},
+    {"block", "bloquea/desbloquea un proceso por ID", (function)block_command}
 };
 
 static void parse_buffer(char *buff, parsed_input_t *parsed);
