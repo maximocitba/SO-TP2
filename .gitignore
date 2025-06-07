@@ -311,3 +311,5 @@ Thumbs.db
 # End of https://mrkandreev.name/snippets/gitignore-generator/#C,CMake,Python,Assembler,JetBrains
 /compile_and_run.sh
 /clean.sh
+TP 2.pdf
+.vscode/*
