@@ -313,3 +313,4 @@ Thumbs.db
 /clean.sh
 TP 2.pdf
 .vscode/*
+.vscode/settings.json
