@@ -13,7 +13,7 @@ const AsciiMap map[256] = {
     {'\x1', 0x0, 0x0, 0},
     {'\x2', 0x0, 0x0, 0},
     {'\x3', 0x2E, 0x0, 2}, // CTRL + C
-    {'\x4', 0x0, 0x0, 0},
+    {'\x04', 0x20, 0x0, 2}, // CTRL + D (EOF)
     {'\x5', 0x0, 0x0, 0},
     {'\x6', 0x0, 0x0, 0},
     {'\x7', 0x0, 0x0, 0},
@@ -140,8 +140,8 @@ const AsciiMap map[256] = {
     {'\xa4', 0xA7, 0x0, 0}, // ñ
     {'\xac', 0x29, 0x0, 3},
     {'\xd1', 0x27, 0x0, 1},
-    {'\xf1', 0x27, 0x0, 0},
-    {'\xFF', 0x54, 0x0, 0} // guarda los registros
+    {'\xf1', 0x27, 0x0, 0}
+    // {'\xFF', 0x54, 0x0, 0} // guarda los registros
 };
 
 char mapKey(char character, int flags[2]) {
@@ -193,20 +193,19 @@ void keyboard_handler() {
         getRegs();
         break;
     default:
-        if (key != '\0') {
+        switch (key)
+        {
+        case '\0':
+            break;
+        case '\x3': // CTRL+C
+            kill_fg_process();
+            break;
+        case '\x04': // CTRL+D (EOF)
+            putIn(-1);
+            break;
+        default:
             putIn(key);
         }
         break;
-    }
-
-    if (keyFlag[1] == 2 && key != '\0') { // si se presiona ctrl y hay una tecla
-        if (key == 'c' || key == 'C') { // ctrl + c
-            // putIn("a"); // enviar señal de interrupción
-        } else if (key == 'd' || key == 'D') { // ctrl + d
-            putIn(0x04); // EOF
-            // putIn(0x04); // EOF
-        } else if (key == 'z' || key == 'Z') { // ctrl + z
-            kill_fg_process(); // matar el proceso foreground
-        }
     }
 }
