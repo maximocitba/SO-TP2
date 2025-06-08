@@ -2,7 +2,7 @@
 #include <stdarg.h>
 #include "../include/stdlib.h"
 
-#define MAX_BUF 1024
+#define MAX_BUF 1024 // Used for itoa buffer
 
 void scanf(const char * fmt, ...) {
     va_list args;
@@ -40,39 +40,67 @@ static void print_str(const char * str, uint64_t foreground, uint64_t background
     }
 }
 
-// ...existing code...
-
 uint64_t vprintf_color(const char * fmt, uint64_t foreground, uint64_t background, va_list args) {
-    uint64_t i = 0;
+    uint64_t char_count = 0;
+    int i = 0;
+    char num_buf[MAX_BUF]; 
+
     while (fmt[i]) {
         if (fmt[i] == '%') {
-            char buf[MAX_BUF];
-            switch (fmt[++i]) {
+            i++;
+            switch (fmt[i]) {
                 case 'd': {
                     int val = va_arg(args, int);
-                    if (val < 0) {
-                        putcharColoured('-', foreground, background);
-                        val = -val;
+                    itoa(val, num_buf);
+                    for (int k = 0; num_buf[k]; k++) {
+                        putcharColoured(num_buf[k], foreground, background);
+                        char_count++;
                     }
-                    itoa(val, buf);
-                    print_str(buf, foreground, background);
                     break;
                 }
-                case 's':
-                    print_str(va_arg(args, char *), foreground, background);
+                case 's': {
+                    char *s = va_arg(args, char *);
+                    if (s == ((char*)0)) { 
+                        putcharColoured('(', foreground, background); char_count++;
+                        putcharColoured('n', foreground, background); char_count++;
+                        putcharColoured('u', foreground, background); char_count++;
+                        putcharColoured('l', foreground, background); char_count++;
+                        putcharColoured('l', foreground, background); char_count++;
+                        putcharColoured(')', foreground, background); char_count++;
+                    } else {
+                        for (int k = 0; s[k]; k++) {
+                            putcharColoured(s[k], foreground, background);
+                            char_count++;
+                        }
+                    }
                     break;
-                case '%':
-                    putchar('%');
+                }
+                case '%': {
+                    putcharColoured('%', foreground, background);
+                    char_count++;
                     break;
-                default:
+                }
+                default: { // Print % and the char if unknown specifier
+                    putcharColoured('%', foreground, background); char_count++;
+                    if (fmt[i]) { // Check if fmt[i] is not the null terminator
+                        putcharColoured(fmt[i], foreground, background);
+                        char_count++;
+                    } else {
+                        // If fmt[i] is null, it means format string ended with %
+                        // Behavior here can be to just stop or print % then stop.
+                        // Current loop structure will break, so i-- might not be needed.
+                    }
                     break;
+                }
             }
         } else {
             putcharColoured(fmt[i], foreground, background);
+            char_count++;
         }
+        if (!fmt[i]) break; // Defensive break, though while(fmt[i]) should handle it.
         i++;
     }
-    return i;
+    return char_count;
 }
 
 uint64_t printf_color(const char * fmt, uint64_t foreground, uint64_t background, ...) {

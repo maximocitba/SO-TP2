@@ -28,6 +28,8 @@ process_t *get_process_by_pid(uint32_t pid);
 int16_t get_current_process_file_descriptor(uint8_t fd_index);
 uint16_t change_process_fd(uint32_t pid, uint16_t fd_index, int16_t new_fd);
 void kill_current_ppid();
+int get_all_processes_info(ps_info_t* buffer, int max_len); // New function
+int toggle_process_block_state(uint32_t pid); // New function
 void kill_fg_process();
 void set_bg_process(uint32_t pid);
 

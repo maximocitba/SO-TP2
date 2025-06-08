@@ -85,7 +85,7 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
 uint64_t test_sync(uint64_t argc, char *argv[]) {
     uint64_t pids[2 * TOTAL_PAIR_PROCESSES];
 
-    printf("\n=== test start (n=%s, sem=%s) ===\n", argv[0], argv[1]);
+    printf("\n=== test start (n=%s, use_sem=%s) ===\n", argv[0], argv[1]);
 
     if (argc != 2) {
         printf("[error] invalid args: %d\n", argc);

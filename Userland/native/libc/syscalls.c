@@ -145,3 +145,11 @@ void sys_set_bg_process(uint32_t pid) {
 uint16_t sys_close_pipe_by_pid(uint16_t pid, uint16_t pipe_id) {
     return syscall(SYS_CLOSE_PIPE_BY_PID, pid, pipe_id, 0, 0, 0);
 }
+
+int sys_get_all_processes_info(ps_info_t* buffer, int max_len) {
+    return syscall(SYS_GET_ALL_PROCESSES_INFO, (uint64_t)buffer, max_len, 0, 0, 0);
+}
+
+int sys_toggle_block_state(uint32_t pid) {
+    return syscall(SYS_TOGGLE_BLOCK_STATE, pid, 0, 0, 0, 0);
+}
