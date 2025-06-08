@@ -21,7 +21,7 @@ static void endless_loop_print_wrap() {
 
 void test_prio() {
     int64_t pids[TOTAL_PROCESSES];
-    char *argv[] = {0};
+   //char *argv[] = {0};
     uint64_t i;
 
     for (i = 0; i < TOTAL_PROCESSES; i++){

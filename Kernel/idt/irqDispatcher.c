@@ -5,7 +5,7 @@
 
 static void int_20();
 static void int_21();
-static int offset_stdout = 0;
+
 
 void irqDispatcher(uint64_t irq) {
 	switch (irq) {

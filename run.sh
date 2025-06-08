@@ -4,7 +4,19 @@ NOMBRE=SO-TP2
 sudo docker run -d -v "$PWD":/root --security-opt seccomp:unconfined -ti --name $NOMBRE agodio/itba-so-multi-platform:3.0
 
 docker start $NOMBRE
-if [[ "$1" == "buddy" ]]; then
+
+# Parse arguments
+USE_BUDDY=0
+FLAG=""
+for arg in "$@"; do
+    if [[ "$arg" == "buddy" ]]; then
+        USE_BUDDY=1
+    elif [[ "$arg" == "-d" ]]; then
+        FLAG="-s -S -d int"
+    fi
+done
+
+if [[ $USE_BUDDY -eq 1 ]]; then
     echo "Compiling with buddy memory manager"
     docker exec -it $NOMBRE make clean -C/root/
     docker exec -it $NOMBRE make -C/root/ KERNEL_MEMMAN_IMPL=mymemman
@@ -15,11 +27,6 @@ else
 fi
 docker stop $NOMBRE
 
-# Set FLAG based on the input argument
-FLAG=""
-[[ "$1" = "-d" ]] && FLAG="-s -S -d int"
-
-# Set common qemu options
 QEMU_CMD="qemu-system-x86_64 $FLAG -hda Image/x64BareBonesImage.qcow2 -m 512"
 
 if [[ "$(uname)" == "Linux" ]]; then

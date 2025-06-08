@@ -17,7 +17,7 @@ void scanf(const char * fmt, ...) {
                     gets(va_arg(args, char *), MAX_BUF);
                     break;
                 case 'c':
-                    gets(va_arg(args, char), 1);
+                    gets(va_arg(args, char*), 1);
                     break;
                 case 'd':
                     gets(buf, MAX_BUF);
@@ -33,12 +33,12 @@ void scanf(const char * fmt, ...) {
     va_end(args);
 }
 
-static void print_str(const char * str, uint64_t foreground, uint64_t background) {
-    uint64_t i = 0;
-    while (str[i]) {
-        putcharColoured(str[i++], foreground, background);
-    }
-}
+// static void print_str(const char * str, uint64_t foreground, uint64_t background) {
+//     uint64_t i = 0;
+//     while (str[i]) {
+//         putcharColoured(str[i++], foreground, background);
+//     }
+// }
 
 uint64_t vprintf_color(const char * fmt, uint64_t foreground, uint64_t background, va_list args) {
     uint64_t char_count = 0;

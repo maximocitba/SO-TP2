@@ -73,7 +73,7 @@ void test_prior() {
 void test_syncro(uint64_t argc, char *argv[]) {
     if (argc != 2) {
         printf("usage: test_synchro <n> <use_sem>\n");
-        return 0;
+        return;
     }
     test_sync(argc, argv); //{n, use_sem, 0}
     // my_test_sync();
@@ -102,7 +102,7 @@ void time() {
 }
 
 void ps_command() {
-    ps_info_t processes[PS_COMMAND_MAX_PROCESS_DISPLAY]; 
+    ps_info_t processes[PS_COMMAND_MAX_PROCESS_DISPLAY];
     int count = sys_get_all_processes_info(processes, PS_COMMAND_MAX_PROCESS_DISPLAY);
 
     if (count < 0) {
@@ -118,27 +118,39 @@ void ps_command() {
     printf("-----|------|-----|---------|-------|-------------------|-------------------|-----------------\n");
 
     for (int i = 0; i < count; i++) {
-        char* state_str;
-        switch(processes[i].state) {
-            case blocked: state_str = "BLOCKED"; break;
-            case ready:   state_str = "READY"; break;
-            case killed:  state_str = "KILLED"; break;
-            case running: state_str = "RUNNING"; break;
-            case waiting_for_child: state_str = "WAITING"; break;
-            default:      state_str = "UNKNOWN"; break;
+        char *state_str;
+        switch (processes[i].state) {
+        case blocked:
+            state_str = "BLOCKED";
+            break;
+        case ready:
+            state_str = "READY";
+            break;
+        case killed:
+            state_str = "KILLED";
+            break;
+        case running:
+            state_str = "RUNNING";
+            break;
+        case waiting_for_child:
+            state_str = "WAITING";
+            break;
+        default:
+            state_str = "UNKNOWN";
+            break;
         }
-        char* fg_bg_str = (processes[i].fg == foreground) ? "FG" : "BG";
-        
+        char *fg_bg_str = (processes[i].fg == foreground) ? "FG" : "BG";
+
         // Removed format specifiers for alignment and width
         printf("%d | %d | %d | %s | %s | %s | %s | %s\n",
-               processes[i].pid,
-               processes[i].parent_pid,
-               processes[i].priority,
-               state_str,
-               fg_bg_str,
-               processes[i].stack_pointer_str,
-               processes[i].base_pointer_str,
-               processes[i].name);
+            processes[i].pid,
+            processes[i].parent_pid,
+            processes[i].priority,
+            state_str,
+            fg_bg_str,
+            processes[i].stack_pointer_str,
+            processes[i].base_pointer_str,
+            processes[i].name);
     }
 }
 
@@ -204,4 +216,18 @@ int block_command(int argc, char **argv) {
         printf("Failed to toggle block state for process %d.\n", pid);
     }
     return 0;
+}
+
+int cat(int argc, char **argv) {
+    char c;
+
+    while (1) {
+        sys_read(0, &c, 1);
+        if (c == EOF) {
+            return 0; // Exit on EOF
+        }
+        putchar(c); // Echo the character
+    }
+
+    return 0; // This line is never reached, but keeps the compiler happy
 }

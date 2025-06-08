@@ -29,6 +29,7 @@ int loop_command(int argc, char **argv);
 int kill_command(int argc, char **argv);
 int nice_command(int argc, char **argv);
 int block_command(int argc, char **argv);
+int cat(int argc, char **argv);
 
 //para excepciones (buscan en Assembler)
 extern void runInvalidOpcodeException(void);

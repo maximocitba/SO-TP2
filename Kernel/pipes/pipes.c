@@ -85,8 +85,8 @@ uint16_t create_pipe() {
     pipe->start_position = 0;
     manager->pipes[pipe->id] = pipe;
     pipe->open = closed;
-    pipe->input_pid = -1;
-    pipe->output_pid = -1;
+    pipe->input_pid = 0;
+    pipe->output_pid = 0;
     manager->count++;
     return pipe->id;
 }
@@ -98,10 +98,10 @@ uint16_t open_pipe(uint16_t pid, uint16_t id, uint8_t mode) {
         return -1;
     }
     pipe->open = opened;
-    if (mode == read_mode && pipe->output_pid == -1) {
+    if (mode == read_mode && pipe->output_pid == 0) {
         pipe->output_pid = pid;
     }
-    if (mode == write_mode && pipe->input_pid == -1) {
+    if (mode == write_mode && pipe->input_pid == 0) {
         pipe->input_pid = pid;
     }
     return 0;

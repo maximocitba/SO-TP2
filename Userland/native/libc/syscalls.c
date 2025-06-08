@@ -6,11 +6,11 @@ void sys_hlt() {
 }
 
 int sys_read(int fd, char *buf, int count) {
-    return syscall(SYS_READ, fd, buf, count, 0, 0);
+    return syscall(SYS_READ, fd, (uint64_t)buf, count, 0, 0);
 }
 
 void sys_write(int fd, char *buf, int count, uint64_t foreground) {
-    syscall(SYS_WRITE, fd, buf, count, foreground, 0);
+    syscall(SYS_WRITE, fd, (uint64_t)buf, count, foreground, 0);
 }
 
 uint64_t sys_time(int d) {
@@ -38,7 +38,7 @@ void sys_new_size(int newSize) {
 }
 
 void sys_putPixel(uint32_t hexColor, uint64_t x, uint64_t y) {
-    syscall(SYS_PUT_PIXEL, hexColor, x, y, 0, 0);
+    syscall(SYS_PUT_PIXEL, hexColor, (uintptr_t)x, y, 0, 0);
 }
 
 int sys_secondsElapsed() {
@@ -66,7 +66,7 @@ void sys_free(void *ptr) {
 }
 
 int64_t sys_exec(void *code, char **argv, int argc, char *name, uint8_t priority) {
-    syscall(SYS_EXEC, (uint64_t)code, (uint64_t)argv, argc, (uint64_t)name, priority);
+    return syscall(SYS_EXEC, (uint64_t)code, (uint64_t)argv, argc, (uint64_t)name, priority);
 }
 
 int sys_kill(uint64_t pid) {
@@ -83,7 +83,7 @@ int sys_unblock(uint64_t pid) {
 }
 
 int sys_nice(uint64_t pid, uint8_t priority) {
-    return syscall(SYS_NICE, pid, priority, 0, 0, 0);
+    return syscall(SYS_NICE, pid, (uintptr_t)priority, 0, 0, 0);
 }
 
 int sys_get_pid() {
@@ -95,7 +95,7 @@ void sys_waitpid(uint64_t child_pid) {
 }
 
 int sys_sem_open(int64_t id, int64_t initial_value) {
-    syscall(SYS_SEM_OPEN, id, initial_value, 0, 0, 0);
+    return syscall(SYS_SEM_OPEN, id, initial_value, 0, 0, 0);
 }
 
 void sys_sem_wait(uint64_t id) {
@@ -119,7 +119,7 @@ uint16_t sys_create_pipe() {
 }
 
 uint16_t sys_open_pipe(uint16_t pid, uint16_t pipe_id, uint8_t mode) {
-    return syscall(SYS_OPEN_PIPE, pid, pipe_id, mode, 0, 0);
+    return syscall(SYS_OPEN_PIPE, pid, (uintptr_t)pipe_id, mode, 0, 0);
 }
 
 uint16_t sys_close_pipe(uint16_t pipe_id) {
@@ -127,7 +127,7 @@ uint16_t sys_close_pipe(uint16_t pipe_id) {
 }
 
 uint16_t sys_write_pipe(uint16_t pid, uint16_t pipe_id, char *data, uint16_t size) {
-    return syscall(SYS_WRITE_PIPE, pid, pipe_id, (uint64_t)data, size, 0);
+    return syscall(SYS_WRITE_PIPE, pid, (uintptr_t)pipe_id, (uint64_t)data, size, 0);
 }
 
 uint16_t sys_read_pipe(uint16_t pid, uint16_t pipe_id, char *data, uint16_t size) {
@@ -135,7 +135,7 @@ uint16_t sys_read_pipe(uint16_t pid, uint16_t pipe_id, char *data, uint16_t size
 }
 
 uint16_t sys_change_process_fd(uint32_t pid, uint16_t fd_index, int16_t new_fd) {
-    return syscall(SYS_CHANGE_PROCESS_FD, pid, fd_index, new_fd, 0, 0);
+    return syscall(SYS_CHANGE_PROCESS_FD, pid, (uintptr_t)fd_index, new_fd, 0, 0);
 }
 
 void sys_set_bg_process(uint32_t pid) {
@@ -143,11 +143,11 @@ void sys_set_bg_process(uint32_t pid) {
 }
 
 uint16_t sys_close_pipe_by_pid(uint16_t pid, uint16_t pipe_id) {
-    return syscall(SYS_CLOSE_PIPE_BY_PID, pid, pipe_id, 0, 0, 0);
+    return syscall(SYS_CLOSE_PIPE_BY_PID, pid, (uintptr_t)pipe_id, 0, 0, 0);
 }
 
 int sys_get_all_processes_info(ps_info_t* buffer, int max_len) {
-    return syscall(SYS_GET_ALL_PROCESSES_INFO, (uint64_t)buffer, max_len, 0, 0, 0);
+    return syscall(SYS_GET_ALL_PROCESSES_INFO, (uint64_t)buffer, (uintptr_t)max_len, 0, 0, 0);
 }
 
 int sys_toggle_block_state(uint32_t pid) {

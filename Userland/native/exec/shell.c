@@ -6,6 +6,7 @@
 #include "../include/stdlib.h"
 #include "../include/string.h"
 #include "../include/syscalls.h"
+#include "../include/string.h"
 
 #define MAX_BUF 1024
 
@@ -31,7 +32,8 @@ command_t commands[] = {
     {"loop", "imprime un saludo cada 30 segundos", (function)loop_command},
     {"kill", "mata un proceso por ID", (function)kill_command},
     {"nice", "cambia la prioridad de un proceso", (function)nice_command},
-    {"block", "bloquea/desbloquea un proceso por ID", (function)block_command}
+    {"block", "bloquea/desbloquea un proceso por ID", (function)block_command},
+    {"cat", "imprime el stdin tal como lo recibe", (function)cat}
 };
 
 static void parse_buffer(char *buff, parsed_input_t *parsed);
@@ -48,7 +50,7 @@ void shell() {
     parsed_input_t parsed;
 
     while (1) {
-        printf_color("user@so", 0xcdff00, 0x000000);
+        printf_color("user@grupo15", 0xcdff00, 0x000000);
         printf(":~$ ");
 
         int i = 0;
@@ -164,9 +166,6 @@ static int execute_command(parsed_input_t *parsed) {
     if (!parsed || parsed->cmd_count == 0)
         return 0;
 
-    printf("Cantidad de cmds: %d\n", parsed->cmd_count);
-    printf("Ejecutando comandos: %s y %s\n", parsed->cmds[0].cmd, parsed->cmd_count > 1 ? parsed->cmds[1].cmd : "NULL");
-
 
     if (parsed->cmd_count == 1) {
         command_input_t *current = &parsed->cmds[0];
@@ -267,6 +266,6 @@ int print_help() {
 }
 
 int print_hola() {
-    printf("Hola, bienvenido a la shell!\n");
+    printf("Hola, saludos desde la Shell!\n");
     return 0;
 }

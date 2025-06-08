@@ -293,9 +293,7 @@ int kill_process(uint32_t pid) {
         remove_all_nodes(scheduler->process_list, (void *)process_to_kill);
     }
 
-    // printf("\n_killing process\n");
-    if (process_to_kill->parent_pid != idle_pid) {
-    }
+
 
     for (int i = 0; i < MAX_PROCESSES; i++) {
         if (scheduler->processes[i] != NULL) {
@@ -437,7 +435,8 @@ int get_all_processes_info(ps_info_t* buffer, int max_len) {
     scheduler_adt scheduler = get_scheduler_adt();
     int count = 0;
     for (int i = 0; i < MAX_PROCESSES && count < max_len; i++) {
-        if (scheduler->processes[i] != NULL && scheduler->processes[i]->process != NULL) {
+        process_t *process_i = (process_t *)scheduler->processes[i]->process;
+        if (scheduler->processes[i] != NULL && scheduler->processes[i]->process != NULL && process_i->state != killed) {
             process_t* p = (process_t*)scheduler->processes[i]->process;
             buffer[count].pid = p->pid;
             buffer[count].priority = p->priority;

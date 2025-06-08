@@ -68,4 +68,5 @@ uint64_t test_mm(uint64_t max_memory) {
 
     }
     printf("[test_mm] finished correctly\n");
+    return 0;
 }

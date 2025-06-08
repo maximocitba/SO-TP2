@@ -43,7 +43,7 @@
 #include <stdint.h>
 #include "../include/definitions.h"
 
-extern uint64_t syscall(uint64_t id, uint64_t par1, void * par2, uint64_t par3, uint64_t par4, uint64_t par5);
+extern uint64_t syscall(uint64_t id, uint64_t par1, uint64_t par2, uint64_t par3, uint64_t par4, uint64_t par5);
 
 void sys_hlt();
 

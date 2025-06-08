@@ -1,27 +1,22 @@
 #include "IO.h"
 #include "font.h"
 #include "interrupts.h"
+#include "pipes.h"
 #include "scheduler.h"
 #include "video.h"
 #include <stdint.h>
-#include "pipes.h"
 
 #define SIZE_BUFFER 1000
+
+void newLine(uint64_t *x, uint64_t *y);
+void deleteCharAt(uint64_t *x, uint64_t *y, uint64_t backgroundColor);
+void putCharAt(uint8_t c, uint64_t *x, uint64_t *y, uint64_t foreColor, uint64_t backgroundColor);
+int yOutOfBounds(uint64_t *y);
+int xOutOfBounds(uint64_t *x);
 
 uint64_t x = 0;
 uint64_t y = 0;
 uint8_t fontSize = 1;
-
-// putChar y printf facilitan el manejo de IO cuando el Kernel quiere escribir cosas
-void putChar(char c) {
-    putCharColoured(c, 0xFFFFFF, BG_COLOR);
-}
-
-void printf(char *str) {
-    for (int i = 0; str[i] != '\0'; i++) {
-        putChar(str[i]);
-    }
-}
 
 void putCharColoured(char c, uint64_t foreGround, uint64_t backGround) {
     switch (c) {
@@ -36,6 +31,16 @@ void putCharColoured(char c, uint64_t foreGround, uint64_t backGround) {
         break;
     }
 }
+// putChar y printf facilitan el manejo de IO cuando el Kernel quiere escribir cosas
+void putChar(char c) {
+    putCharColoured(c, 0xFFFFFF, BG_COLOR);
+}
+
+void printf(char *str) {
+    for (int i = 0; str[i] != '\0'; i++) {
+        putChar(str[i]);
+    }
+}
 
 // el stdout no se guarda. Solo se guardan las coordenadas de la última posición
 
@@ -44,7 +49,7 @@ static char stdinArr[SIZE_BUFFER];
 static int sizeIn = 0;
 static int startsIn = 0;
 
-static char videoModeOn = 0;
+//static char videoModeOn = 0;
 
 // Funciones que manejan stdin, stdout y stderr
 void putOut(char c, uint64_t foreground) {
@@ -83,7 +88,8 @@ void sys_write_color(int fd, const char *buf, int count, uint64_t foreground) {
             putErr(buf[i]);
         }
     } else if (current_fd >= BUILTIN_FDS) {
-        return write_pipe(get_current_pid(), current_fd, buf, count);
+        write_pipe(get_current_pid(), current_fd, buf, count);
+        return;
     }
 }
 
@@ -101,15 +107,29 @@ void sys_write(int fd, const char *buf, int count) {
             putErr(buf[i]);
         }
     } else if (current_fd >= BUILTIN_FDS) {
-        return write_pipe(get_current_pid(), current_fd, buf, count);
+        write_pipe(get_current_pid(), current_fd, buf, count);
+        return;
     }
-
 }
 
 // inspirado en la función de la API de Linux
 int sys_read(int fd, char *buf, int count) {
+    int16_t current_fd = get_current_process_file_descriptor(fd);
+    
+    if (current_fd == DEV_NULL) {
+        buf[0] = EOF;
+        return 0;
+    } else if (current_fd < DEV_NULL) {
+        return -1;
+    }
+
+    if (current_fd >= BUILTIN_FDS) {
+        read_pipe(get_current_pid(), current_fd, buf, count);
+        return count; // asumiendo que se lee todo lo que se pide
+    }
+
     int i = 0;
-    if (fd == 0) {
+    if (current_fd == 0) {
         for (i = 0; i < count && i < sizeIn; i++) {
             buf[i] = stdinArr[(startsIn + i) % SIZE_BUFFER];
         }

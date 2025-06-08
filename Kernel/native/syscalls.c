@@ -62,13 +62,13 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
             return 1;
         case SYS_WRITE:
             if (param_4 != 0) {
-                sys_write_color(param_1, param_2, param_3, param_4);
+                sys_write_color(param_1, (const char *)param_2, param_3, param_4);
             } else {
-                sys_write(param_1, param_2, param_3);
+                sys_write(param_1, (const char*)param_2, param_3);
             }
             return 1;
         case SYS_READ:
-            return sys_read(param_1, param_2, param_3);
+            return sys_read(param_1, (char*)param_2, param_3);
         case SYS_CLEAR_SCREEN:
             sys_clearScreen();
             return 1;
@@ -93,12 +93,12 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
             sys_registers();
             return 1;
         case SYS_MALLOC:
-            return b_alloc(param_1);
+            return (uint64_t)b_alloc(param_1);
         case SYS_FREE:
             b_free((void *)param_1);
             return 1;
         case SYS_EXEC:
-            return create_process(param_1, (char **)param_2, param_3, (char *)param_4, param_5, 0);
+            return create_process((function)param_1, (char **)param_2, param_3, (char *)param_4, param_5, 0);
         case SYS_KILL:
             return kill_process(param_1);
         case SYS_BLOCK:

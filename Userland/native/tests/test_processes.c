@@ -24,7 +24,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
     int alive = 0;
     uint8_t action;
     uint64_t max_processes;
-    char *argv_aux[] = {0};
+    //char *argv_aux[] = {0};
 
     if (argc <= 0)
         return -1;
@@ -96,4 +96,5 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
 
         printf("[test_processes] all processes have been killed correctly\n");
     }
+    return 0;
 }
