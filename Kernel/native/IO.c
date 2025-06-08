@@ -141,12 +141,16 @@ int sys_read(int fd, char *buf, int count) {
 }
 
 void sys_new_size(int newSize) {
-    _cli; // por las dudas paro los in/out (antes generaba bugs)
-    if (newSize < 1 || newSize > 5)
+    if (newSize < 1 || newSize > 5) {
         return;
+    }
+    _cli(); // por las dudas paro los in/out (antes generaba bugs)
     fontSize = newSize;
-    sys_clearScreen();
-    _sti;
+    // Clear screen and reset cursor when changing font size
+    clearScreen(BG_COLOR);
+    x = 0;
+    y = 0;
+    _sti();
 }
 
 // imprime caracter y modifica coordenadas. Usado para representar el stdout
