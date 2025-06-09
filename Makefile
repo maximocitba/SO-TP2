@@ -26,5 +26,9 @@ clean:
 	cd Userland; make clean
 	# Remove ELF and BIN files from the project root
 	rm -f *.elf *.bin
+	# Remove PVS-Studio analysis files
+	rm -f report.tasks strace_out
+	rm -f Userland/strace_out
+
 
 .PHONY: bootloader image collections kernel userland all clean
