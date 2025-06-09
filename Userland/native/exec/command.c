@@ -216,7 +216,7 @@ int loop_command(int argc, char **argv) {
     }
     uint64_t pid = sys_get_pid();
     while (1) {
-        printf("Process ID: %d says hello!\n", pid);
+        printf("Process ID: %d says hello!\n", (int)pid);
         sys_sleep(30000); // Sleep for 30 seconds
     }
     return 0; // Should not be reached
@@ -227,11 +227,11 @@ int kill_command(int argc, char **argv) {
         printf("Usage: kill <pid>\n");
         return 1; // Return non-zero for error
     }
-    uint64_t pid_to_kill = satoi(argv[0]);
+    int64_t pid_to_kill = satoi(argv[0]);
     if (sys_kill(pid_to_kill) == 0) {
-        printf("Process %d killed successfully.\n", pid_to_kill);
+        printf("Process %d killed successfully.\n", (int)pid_to_kill);
     } else {
-        printf("Failed to kill process %d. It might not exist or you lack permissions.\n", pid_to_kill);
+        printf("Failed to kill process %d. It might not exist or you lack permissions.\n", (int)pid_to_kill);
     }
     return 0;
 }
@@ -245,14 +245,14 @@ int nice_command(int argc, char **argv) {
     uint8_t new_priority = satoi(argv[1]);
 
     if (new_priority < low || new_priority > high) {
-        printf("Invalid priority. Must be between %d and %d.\n", low, high);
+        printf("Invalid priority. Must be between %d and %d.\n", (int)low, (int)high);
         return 1; // Return non-zero for error
     }
 
     if (sys_nice(pid, new_priority) == 1) { // Assuming 1 is success for nice
-        printf("Priority of process %d changed to %d.\n", pid, new_priority);
+        printf("Priority of process %d changed to %d.\n", (int)pid, (int)new_priority);
     } else {
-        printf("Failed to change priority for process %d.\n", pid);
+        printf("Failed to change priority for process %d.\n", (int)pid);
     }
     return 0;
 }
@@ -262,13 +262,13 @@ int block_command(int argc, char **argv) {
         printf("Usage: block <pid>\n");
         return 1; // Return non-zero for error
     }
-    uint64_t pid = satoi(argv[0]);
+    int64_t pid = satoi(argv[0]);
     int result = sys_toggle_block_state(pid);
 
     if (result == 0) { // Assuming 0 is success for toggle
-        printf("Process %d block/unblock toggled successfully.\n", pid);
+        printf("Process %d block/unblock toggled successfully.\n", (int)pid);
     } else {
-        printf("Failed to toggle block state for process %d.\n", pid);
+        printf("Failed to toggle block state for process %d.\n", (int)pid);
     }
     return 0;
 }

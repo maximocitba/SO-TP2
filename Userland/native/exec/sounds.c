@@ -113,8 +113,8 @@ void play_song(int song_id){
         case 2: initializeQueueWithArray(os_initiating, OS_INITIALIZING_LENGTH); break;
         case 3: initializeQueueWithArray(you_lost, YOU_LOST_LENGTH); break;
         default: initializeQueue(); break;
-        last_note_ticks = sys_ticks_elapsed();
     }
+    last_note_ticks = sys_ticks_elapsed();
 }
 
 void playNote(MusicalNote note){

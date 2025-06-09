@@ -182,8 +182,6 @@ void keyboard_handler() {
         keyFlag[1] = 0;
         break;
     case '\x9D': // left-ctrl released
-        keyFlag[1] = 0;
-        break;
     case '\xB8': // left-alt released
         keyFlag[1] = 0;
         break;

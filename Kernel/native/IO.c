@@ -16,20 +16,20 @@ void putCharAt(uint8_t c, uint64_t *x, uint64_t *y, uint64_t foreColor, uint64_t
 int yOutOfBounds(uint64_t *y);
 int xOutOfBounds(uint64_t *x);
 
-uint64_t x = 0;
-uint64_t y = 0;
+uint64_t cursor_x = 0;
+uint64_t cursor_y = 0;
 uint8_t fontSize = 1;
 
 void putCharColoured(char c, uint64_t foreGround, uint64_t backGround) {
     switch (c) {
     case 0x0A:
-        newLine(&x, &y);
+        newLine(&cursor_x, &cursor_y);
         break;
     case 0x08:
-        deleteCharAt(&x, &y, backGround);
+        deleteCharAt(&cursor_x, &cursor_y, backGround);
         break;
     default:
-        putCharAt(c, &x, &y, foreGround, backGround);
+        putCharAt(c, &cursor_x, &cursor_y, foreGround, backGround);
         break;
     }
 }
@@ -141,8 +141,8 @@ void sys_new_size(int newSize) {
     fontSize = newSize;
 
     clearScreen(BG_COLOR);
-    x = 0;
-    y = 0;
+    cursor_x = 0;
+    cursor_y = 0;
     _sti();
 }
 
@@ -196,6 +196,6 @@ int yOutOfBounds(uint64_t *y) {
 
 void sys_clearScreen() {
     clearScreen(BG_COLOR);
-    y = 0;
-    x = 0;
+    cursor_y = 0;
+    cursor_x = 0;
 }

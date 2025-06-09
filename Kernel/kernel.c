@@ -19,11 +19,17 @@ extern uint8_t endOfKernel;
 
 static const uint64_t PageSize = 0x1000;
 
-static void *const sampleCodeModuleAddress = (void *)(uintptr_t)0x400000;
-static void *const sampleDataModuleAddress = (void *)(uintptr_t)0x500000;
+// Memory layout constants
+#define SAMPLE_CODE_MODULE_ADDR    0x400000UL
+#define SAMPLE_DATA_MODULE_ADDR    0x500000UL
+#define HEAP_START_ADDR           0x1000000UL
+#define HEAP_END_ADDR             0x2000000UL
 
-static void *const heap_start_address = (void *)(uintptr_t)0x1000000;
-static void *const heap_end_address = (void *)(uintptr_t)0x2000000;
+static void *const sampleCodeModuleAddress = (void *)(uintptr_t)SAMPLE_CODE_MODULE_ADDR;    //-V566 Ignore the warning about casting to void* from uintptr_t, as this is intentional for memory address representation.
+static void *const sampleDataModuleAddress = (void *)(uintptr_t)SAMPLE_DATA_MODULE_ADDR;    //-V566 Ignore the warning about casting to void* from uintptr_t, as this is intentional for memory address representation.
+
+static void *const heap_start_address = (void *)(uintptr_t)HEAP_START_ADDR;                 //-V566 Ignore the warning about casting to void* from uintptr_t, as this is intentional for memory address representation.
+static void *const heap_end_address = (void *)(uintptr_t)HEAP_END_ADDR;                     //-V566 Ignore the warning about casting to void* from uintptr_t, as this is intentional for memory address representation.
 
 typedef int (*EntryPoint)();
 
