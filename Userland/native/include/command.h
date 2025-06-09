@@ -33,6 +33,7 @@ int cat(int argc, char **argv);
 int echo(int argc, char **argv);
 int wc(int argc, char **argv);
 int filter(int argc, char **argv);
+int phylo(int argc, char **argv);
 
 //para excepciones (buscan en Assembler)
 extern void runInvalidOpcodeException(void);

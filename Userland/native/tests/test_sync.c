@@ -3,6 +3,7 @@
 #include "syscall.h"
 #include <stdint.h>
 #include <syscalls.h>
+#include "../include/definitions.h"
 
 #define SEM_ID 0
 #define TOTAL_PAIR_PROCESSES 2
@@ -100,10 +101,10 @@ uint64_t test_sync(uint64_t argc, char *argv[]) {
     uint64_t i;
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
         // printf("\n_creating pair %d:\n", i+1);
-        pids[i] = sys_exec((void *)&my_process_inc, argv_dec, 3, "my_process_dec", 1);
+        pids[i] = sys_exec((void *)&my_process_inc, argv_dec, 3, "my_process_dec", low);
         // printf("\n- dec pid: %d, global:%d \n", pids[i], global);
 
-        pids[i + TOTAL_PAIR_PROCESSES] = sys_exec((void *)&my_process_inc, argv_inc, 3, "my_process_inc", 1);
+        pids[i + TOTAL_PAIR_PROCESSES] = sys_exec((void *)&my_process_inc, argv_inc, 3, "my_process_inc", low);
         // printf("\n- inc pid: %d\n, global: %d", pids[i + TOTAL_PAIR_PROCESSES], global);
     }
 
