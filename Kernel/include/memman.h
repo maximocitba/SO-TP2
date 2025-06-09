@@ -7,6 +7,6 @@
 void b_init(void *start_addr, size_t size);
 void *b_alloc(size_t size);
 void b_free(void *ptr);
-size_t * mem_info();
+size_t *mem_info();
 
 #endif

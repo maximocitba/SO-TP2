@@ -13,10 +13,11 @@ typedef struct MM_rq {
     uint32_t size;
 } mm_rq;
 
+static mm_rq mm_rqs[MAX_BLOCKS];
+
 uint64_t test_mm(uint64_t max_memory) {
     printf("test_mm start\n");
 
-    mm_rq mm_rqs[MAX_BLOCKS];
     uint8_t rq;
     uint32_t total;
 
@@ -38,7 +39,7 @@ uint64_t test_mm(uint64_t max_memory) {
                 rq++;
             }
         }
-        printf("[test_mm] allocated %d blocks\n", rq);
+        printf("allocated %d blocks\n", rq);
 
         // Set
         // printf("starting test set\n");
@@ -47,7 +48,7 @@ uint64_t test_mm(uint64_t max_memory) {
             if (mm_rqs[i].address)
                 memset(mm_rqs[i].address, i, mm_rqs[i].size);
 
-        printf("[test_mm] set %d blocks\n", rq);
+        printf("set %d blocks\n", rq);
 
         // Check
         // printf("starting test check\n");
@@ -63,10 +64,10 @@ uint64_t test_mm(uint64_t max_memory) {
         for (i = 0; i < rq; i++)
             if (mm_rqs[i].address){
                 free(mm_rqs[i].address);
-                printf("[test_mm] freed block %d of size %d\n", i, mm_rqs[i].size);
+                printf("freed block %d of size %d\n", i, mm_rqs[i].size);
             }
 
     }
-    printf("[test_mm] finished correctly\n");
+    printf("finished correctly\n");
     return 0;
 }

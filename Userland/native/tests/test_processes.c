@@ -15,7 +15,6 @@ typedef struct P_rq {
 } p_rq;
 
 static void endless_loop_wrap() {
-    printf("[endless_loop_wrap] process with pid: %d started\n", sys_get_pid());
     endless_loop();
 }
 
@@ -49,8 +48,8 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
                 alive++;
             }
         }
-        printf("[test_processes] created %d processes\n", max_processes);
-        
+        printf("created %d processes\n", max_processes);
+
         // Randomly kills, blocks or unblocks processes until every one has been killed
         while (alive > 0) {
 
@@ -67,7 +66,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
                         // printf("No di error, voy a matar el proceso\n");
                         p_rqs[rq].state = KILLED;
                         alive--;
-                        printf("[test_processes] killed process of pid: %d\n", p_rqs[rq].pid);
+                        printf("killed process of pid: %d\n", p_rqs[rq].pid);
                     }
                     break;
 
@@ -94,7 +93,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
                 }
         }
 
-        printf("[test_processes] all processes have been killed correctly\n");
+        printf("all processes have been killed correctly\n");
     }
     return 0;
 }

@@ -55,8 +55,13 @@ void changeSize_5() {
     sys_new_size(5);
 }
 
-void test_mem() {
-    test_mm(500);
+void test_mem(uint64_t argc, char *argv[]) {
+    if (argc != 1) {
+        printf("usage: test_mm <n>\n");
+        return;
+    }
+
+    test_mm(argv[0] ? satoi(argv[0]) : 0); //{n, 0, 0}
 }
 
 void test_proc() {

@@ -1,8 +1,8 @@
 #include "keyboard.h"
 #include "IO.h"
 #include "lib.h"
-#include "video.h"
 #include "scheduler.h"
+#include "video.h"
 
 #define REGS_SIZE 18
 
@@ -193,8 +193,7 @@ void keyboard_handler() {
         getRegs();
         break;
     default:
-        switch (key)
-        {
+        switch (key) {
         case '\0':
             break;
         case '\x3': // CTRL+C

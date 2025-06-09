@@ -1,14 +1,14 @@
 #include "../include/scheduler.h"
 #include "../include/linked_list.h"
 #include "../include/queue_pid.h"
-// #include <idtLoader.h>
+
 #include <IO.h>
 #include <lib.h>
 #include <math.h>
 #include <memman.h>
 #include <process.h>
 #include <semaphore.h>
-#include <string.h> // Added for strlen and memcpy
+#include <string.h>
 
 #define idle_pid 0
 #define default_quantum 5
@@ -21,11 +21,11 @@ uint8_t idle_rotation = 0;
 typedef struct scheduler_cdt {
     node_t *processes[MAX_PROCESSES];
     linked_list_adt blocked_process_list;
-    linked_list_adt process_list; // lista de procesos en ready menos idle
+    linked_list_adt process_list;
     uint16_t bg_process_list[MAX_PROCESSES];
     int current_pid;
     uint16_t next_unused_pid;
-    uint16_t remaining_processes; // cantidad de procesos en ejecución con idle
+    uint16_t remaining_processes;
     int32_t current_quantum;
     uint8_t num_bg_processes;
 } scheduler_cdt;
@@ -60,10 +60,9 @@ int32_t get_next_ready_pid() {
     scheduler_adt scheduler = get_scheduler_adt();
 
     if (scheduler->remaining_processes <= 1) {
-        return idle_pid; // No hay procesos, retorna el idle
+        return idle_pid;
     }
 
-    // si hay procesos en background, y ningun proceso foreground, idle deberia correr cada tanto.
     if (scheduler->remaining_processes - scheduler->num_bg_processes <= 1) {
         idle_rotation = (idle_rotation + 1) % 2;
         if (idle_rotation == 0) {
@@ -105,7 +104,7 @@ void *scheduler(void *stack_pointer) {
             current_process->state = ready;
             swap_to_last(scheduler->process_list, current_process);
         } else {
-            // idle process should not be swapped to last
+
             current_process->state = ready;
         }
         break;
@@ -286,14 +285,12 @@ int kill_process(uint32_t pid) {
     remove_from_all_semaphores(pid);
 
     if (process_to_kill->state == blocked) {
-        // printf("\n_killing blocked process\n");
+
         remove_all_nodes(scheduler->blocked_process_list, (void *)process_to_kill);
     } else {
-        // printf("\n_killing running process\n");
+
         remove_all_nodes(scheduler->process_list, (void *)process_to_kill);
     }
-
-
 
     for (int i = 0; i < MAX_PROCESSES; i++) {
         if (scheduler->processes[i] != NULL) {
@@ -431,13 +428,13 @@ void set_bg_process(uint32_t pid) {
     scheduler->num_bg_processes++;
 }
 
-int get_all_processes_info(ps_info_t* buffer, int max_len) {
+int get_all_processes_info(ps_info_t *buffer, int max_len) {
     scheduler_adt scheduler = get_scheduler_adt();
     int count = 0;
     for (int i = 0; i < MAX_PROCESSES && count < max_len; i++) {
         process_t *process_i = (process_t *)scheduler->processes[i]->process;
         if (scheduler->processes[i] != NULL && scheduler->processes[i]->process != NULL && process_i->state != killed) {
-            process_t* p = (process_t*)scheduler->processes[i]->process;
+            process_t *p = (process_t *)scheduler->processes[i]->process;
             buffer[count].pid = p->pid;
             buffer[count].priority = p->priority;
             buffer[count].state = p->state;
@@ -455,17 +452,17 @@ int get_all_processes_info(ps_info_t* buffer, int max_len) {
 int toggle_process_block_state(uint32_t pid) {
     scheduler_adt scheduler = get_scheduler_adt();
     if (pid == idle_pid || scheduler->processes[pid] == NULL || scheduler->processes[pid]->process == NULL) {
-        return -1; // Cannot block/unblock idle or non-existent process
+        return -1;
     }
 
-    process_t* p = (process_t*)scheduler->processes[pid]->process;
+    process_t *p = (process_t *)scheduler->processes[pid]->process;
 
     if (p->state == blocked) {
         return unblock_process(pid);
     } else if (p->state == ready || p->state == running) {
         return block_process(pid);
     }
-    return -1; // Process is in a state that cannot be toggled (e.g., killed)
+    return -1;
 }
 
 #undef capped_priority

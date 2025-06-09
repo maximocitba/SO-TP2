@@ -1,7 +1,6 @@
 #include <memman.h>
 #include <stddef.h>
 
-
 #define MAX_ORDER 32
 #define MIN 4
 #define taken 0
@@ -42,24 +41,24 @@ static buddy_t *getBuddy(void) {
 void b_init(void *initial_addr, size_t size) {
     buddy_addr = (buddy_t *)initial_addr;
     buddy_t *buddy = getBuddy();
-    
+
     buddy->base = (void *)((uintptr_t)initial_addr + sizeof(buddy_t));
     buddy->max = get_order(size);
     buddy->total_mem = size;
     buddy->used_mem = 0;
-    
+
     // Initialize free lists
-    for(int i = 0; i < MAX_ORDER; i++) {
+    for (int i = 0; i < MAX_ORDER; i++) {
         buddy->free_lists[i] = NULL;
     }
-    
+
     buddy->free_lists[buddy->max - 1] = new_block_t(buddy->base, buddy->max, NULL);
 }
 
 void *b_alloc(size_t size) {
     buddy_t *buddy = getBuddy();
     uint8_t order = get_order(size + sizeof(block_t));
-    
+
     if (order < MIN - 1) {
         order = MIN - 1;
     }
@@ -94,15 +93,15 @@ void b_free(void *ptr) {
     if (ptr == NULL) {
         return;
     }
-    
+
     buddy_t *buddy = getBuddy();
     block_t *block = show_block_t(ptr);
     block->state = freed;
     buddy->used_mem -= block_size(block->order);
 
-    for (block_t *buddy_block = buddy_of(block); 
-         buddy_block->state == freed && buddy_block->order == block->order && block->order < buddy->max; 
-         buddy_block = buddy_of(block)) {
+    for (block_t *buddy_block = buddy_of(block);
+        buddy_block->state == freed && buddy_block->order == block->order && block->order < buddy->max;
+        buddy_block = buddy_of(block)) {
         block = merge_block(buddy, block, buddy_block);
     }
 
@@ -175,15 +174,14 @@ static inline block_t *buddy_of(block_t *block) {
     return (block_t *)((uintptr_t)buddy->base + buddy_relative_addr);
 }
 
-size_t * mem_info() {
+size_t *mem_info() {
     buddy_t *buddy = getBuddy();
-    size_t *info = (size_t *)b_alloc(3 * sizeof(size_t)); 
+    size_t *info = (size_t *)b_alloc(3 * sizeof(size_t));
     if (info == NULL) {
-        return NULL; 
+        return NULL;
     }
     info[0] = buddy->total_mem;
     info[1] = buddy->used_mem;
     info[2] = buddy->total_mem - buddy->used_mem;
-    return info; 
+    return info;
 }
-

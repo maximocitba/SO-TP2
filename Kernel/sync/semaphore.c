@@ -1,10 +1,9 @@
 #include "../include/semaphore.h"
+#include "../include/IO.h"
 #include "../include/linked_list.h"
+#include "../include/memman.h"
 #include "../include/queue_pid.h"
 #include "../include/scheduler.h"
-// #include <syscalls.h>
-#include "../include/IO.h"
-#include "../include/memman.h"
 
 static sem_t *semaphores[max_semaphores] = {NULL};
 

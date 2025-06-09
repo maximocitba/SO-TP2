@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 
-#define MAX_PROCESSES (1<<15)
-#define stack_size (1<<12)
+#define MAX_PROCESSES (1 << 15)
+#define stack_size (1 << 12)
 #define SCHEDULER_ADDRESS 0x600000
 #define MAX_PRIORITY 5
 #define EOF (-1)
@@ -16,12 +16,25 @@
 #define MAX_PROC_NAME_LEN 32
 #define MAX_PTR_STR_LEN 19 // "0x" + 16 hex chars for 64-bit address + null terminator
 
-typedef enum { blocked = 0, ready, killed, running, waiting_for_child} state_t;
-typedef enum { low = 1, low_medium, medium, high_medium, high } priority_t;
-typedef enum { STDIN=0, STDOUT, STDERR } basic_fd_t;
-typedef enum pipe_state { closed=0, opened } pipe_state;
-typedef enum { foreground=0, background } fg_bg_t;
-typedef enum pipe_mode { read_mode=0, write_mode } pipe_mode;
+typedef enum { blocked = 0,
+    ready,
+    killed,
+    running,
+    waiting_for_child } state_t;
+typedef enum { low = 1,
+    low_medium,
+    medium,
+    high_medium,
+    high } priority_t;
+typedef enum { STDIN = 0,
+    STDOUT,
+    STDERR } basic_fd_t;
+typedef enum pipe_state { closed = 0,
+    opened } pipe_state;
+typedef enum { foreground = 0,
+    background } fg_bg_t;
+typedef enum pipe_mode { read_mode = 0,
+    write_mode } pipe_mode;
 
 typedef struct {
     int32_t pid;
@@ -40,11 +53,11 @@ typedef struct {
     int32_t pid;
     priority_t priority;
     state_t state;
-    char* name;
+    char *name;
     int argc;
-    char** argv;
-    char * stack_pointer;
-    char * base_pointer;
+    char **argv;
+    char *stack_pointer;
+    char *base_pointer;
     fg_bg_t fg;
 } process_snapshot_t;
 

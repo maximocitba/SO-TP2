@@ -1,32 +1,32 @@
 #include "../include/stdio.h"
-#include <stdarg.h>
 #include "../include/stdlib.h"
+#include <stdarg.h>
 
 #define MAX_BUF 1024 // Used for itoa buffer
 
-void scanf(const char * fmt, ...) {
+void scanf(const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
 
     char buf[MAX_BUF];
 
-    for (int i = 0; fmt[i] != '\0' ; i++) {
+    for (int i = 0; fmt[i] != '\0'; i++) {
         if (fmt[i++] == '%') {
             switch (fmt[i]) {
-                case 's':
-                    gets(va_arg(args, char *), MAX_BUF);
-                    break;
-                case 'c':
-                    gets(va_arg(args, char*), 1);
-                    break;
-                case 'd':
-                    gets(buf, MAX_BUF);
-                    int value = atoi(buf);
-                    int * aux = va_arg(args, int *);
-                    * aux = value;
-                    break;
-                default:
-                    break;
+            case 's':
+                gets(va_arg(args, char *), MAX_BUF);
+                break;
+            case 'c':
+                gets(va_arg(args, char *), 1);
+                break;
+            case 'd':
+                gets(buf, MAX_BUF);
+                int value = atoi(buf);
+                int *aux = va_arg(args, int *);
+                *aux = value;
+                break;
+            default:
+                break;
             }
         }
     }
@@ -40,70 +40,85 @@ void scanf(const char * fmt, ...) {
 //     }
 // }
 
-uint64_t vprintf_color(const char * fmt, uint64_t foreground, uint64_t background, va_list args) {
+uint64_t vprintf_color(const char *fmt, uint64_t foreground, uint64_t background, va_list args) {
     uint64_t char_count = 0;
     int i = 0;
-    char num_buf[MAX_BUF]; 
+    char num_buf[MAX_BUF];
 
     while (fmt[i]) {
         if (fmt[i] == '%') {
             i++;
             switch (fmt[i]) {
-                case 'd': {
-                    int val = va_arg(args, int);
-                    itoa(val, num_buf);
-                    for (int k = 0; num_buf[k]; k++) {
-                        putcharColoured(num_buf[k], foreground, background);
-                        char_count++;
-                    }
-                    break;
-                }
-                case 's': {
-                    char *s = va_arg(args, char *);
-                    if (s == ((char*)0)) { 
-                        putcharColoured('(', foreground, background); char_count++;
-                        putcharColoured('n', foreground, background); char_count++;
-                        putcharColoured('u', foreground, background); char_count++;
-                        putcharColoured('l', foreground, background); char_count++;
-                        putcharColoured('l', foreground, background); char_count++;
-                        putcharColoured(')', foreground, background); char_count++;
-                    } else {
-                        for (int k = 0; s[k]; k++) {
-                            putcharColoured(s[k], foreground, background);
-                            char_count++;
-                        }
-                    }
-                    break;
-                }
-                case '%': {
-                    putcharColoured('%', foreground, background);
+                // ...existing code...
+            case 'd': {
+                int val = va_arg(args, int);
+                if (val < 0) {
+                    putcharColoured('-', foreground, background);
                     char_count++;
-                    break;
+                    val = -val;
                 }
-                default: { // Print % and the char if unknown specifier
-                    putcharColoured('%', foreground, background); char_count++;
-                    if (fmt[i]) { // Check if fmt[i] is not the null terminator
-                        putcharColoured(fmt[i], foreground, background);
+                itoa(val, num_buf);
+                for (int k = 0; num_buf[k]; k++) {
+                    putcharColoured(num_buf[k], foreground, background);
+                    char_count++;
+                }
+                break;
+            }
+                // ...existing code...
+            case 's': {
+                char *s = va_arg(args, char *);
+                if (s == ((char *)0)) {
+                    putcharColoured('(', foreground, background);
+                    char_count++;
+                    putcharColoured('n', foreground, background);
+                    char_count++;
+                    putcharColoured('u', foreground, background);
+                    char_count++;
+                    putcharColoured('l', foreground, background);
+                    char_count++;
+                    putcharColoured('l', foreground, background);
+                    char_count++;
+                    putcharColoured(')', foreground, background);
+                    char_count++;
+                } else {
+                    for (int k = 0; s[k]; k++) {
+                        putcharColoured(s[k], foreground, background);
                         char_count++;
-                    } else {
-                        // If fmt[i] is null, it means format string ended with %
-                        // Behavior here can be to just stop or print % then stop.
-                        // Current loop structure will break, so i-- might not be needed.
                     }
-                    break;
                 }
+                break;
+            }
+            case '%': {
+                putcharColoured('%', foreground, background);
+                char_count++;
+                break;
+            }
+            default: { // Print % and the char if unknown specifier
+                putcharColoured('%', foreground, background);
+                char_count++;
+                if (fmt[i]) { // Check if fmt[i] is not the null terminator
+                    putcharColoured(fmt[i], foreground, background);
+                    char_count++;
+                } else {
+                    // If fmt[i] is null, it means format string ended with %
+                    // Behavior here can be to just stop or print % then stop.
+                    // Current loop structure will break, so i-- might not be needed.
+                }
+                break;
+            }
             }
         } else {
             putcharColoured(fmt[i], foreground, background);
             char_count++;
         }
-        if (!fmt[i]) break; // Defensive break, though while(fmt[i]) should handle it.
+        if (!fmt[i])
+            break; // Defensive break, though while(fmt[i]) should handle it.
         i++;
     }
     return char_count;
 }
 
-uint64_t printf_color(const char * fmt, uint64_t foreground, uint64_t background, ...) {
+uint64_t printf_color(const char *fmt, uint64_t foreground, uint64_t background, ...) {
     va_list args;
     va_start(args, background);
     uint64_t ret = vprintf_color(fmt, foreground, background, args);
@@ -111,7 +126,7 @@ uint64_t printf_color(const char * fmt, uint64_t foreground, uint64_t background
     return ret;
 }
 
-void printf(const char * fmt, ...) {
+void printf(const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
     vprintf_color(fmt, 0xFFFFFF, 0x000000, args);

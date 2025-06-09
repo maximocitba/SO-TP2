@@ -31,7 +31,7 @@ void putCharColoured(char c, uint64_t foreGround, uint64_t backGround) {
         break;
     }
 }
-// putChar y printf facilitan el manejo de IO cuando el Kernel quiere escribir cosas
+
 void putChar(char c) {
     putCharColoured(c, 0xFFFFFF, BG_COLOR);
 }
@@ -42,16 +42,10 @@ void printf(char *str) {
     }
 }
 
-// el stdout no se guarda. Solo se guardan las coordenadas de la última posición
-
-// el stdin es un array cíclico
 static char stdinArr[SIZE_BUFFER];
 static int sizeIn = 0;
 static int startsIn = 0;
 
-//static char videoModeOn = 0;
-
-// Funciones que manejan stdin, stdout y stderr
 void putOut(char c, uint64_t foreground) {
     putCharColoured(c, foreground, BG_COLOR);
 }
@@ -61,11 +55,10 @@ void putErr(char c) {
 }
 
 void putIn(char c) {
-    // caso especial donde se pasa del límite: no se pueden agregar caracteres
+
     if (sizeIn >= SIZE_BUFFER - 1)
         return;
 
-    // mete c en el vector cíclico
     int pos = (startsIn + sizeIn) % SIZE_BUFFER;
 
     stdinArr[pos] = c;
@@ -79,28 +72,9 @@ void clearIn() {
 void sys_write_color(int fd, const char *buf, int count, uint64_t foreground) {
     int16_t current_fd = get_current_process_file_descriptor(fd);
 
-    if (current_fd == 1) { // stdout
-        for (int i = 0; i < count; i++) {
-            putOut(buf[i], foreground);
-        }
-    } else if (current_fd == 2) { // stderr
-        for (int i = 0; i < count; i++) {
-            putErr(buf[i]);
-        }
-    } else if (current_fd >= BUILTIN_FDS) {
-        write_pipe(get_current_pid(), current_fd, buf, count);
-        return;
-    }
-}
-
-// inspirado en la función de la API de Linux
-void sys_write(int fd, const char *buf, int count) {
-
-    int16_t current_fd = get_current_process_file_descriptor(fd);
-
     if (current_fd == 1) {
         for (int i = 0; i < count; i++) {
-            putOut(buf[i], 0xFFFFFF); // por defecto el foreground es blanco
+            putOut(buf[i], foreground);
         }
     } else if (current_fd == 2) {
         for (int i = 0; i < count; i++) {
@@ -112,10 +86,27 @@ void sys_write(int fd, const char *buf, int count) {
     }
 }
 
-// inspirado en la función de la API de Linux
+void sys_write(int fd, const char *buf, int count) {
+
+    int16_t current_fd = get_current_process_file_descriptor(fd);
+
+    if (current_fd == 1) {
+        for (int i = 0; i < count; i++) {
+            putOut(buf[i], 0xFFFFFF);
+        }
+    } else if (current_fd == 2) {
+        for (int i = 0; i < count; i++) {
+            putErr(buf[i]);
+        }
+    } else if (current_fd >= BUILTIN_FDS) {
+        write_pipe(get_current_pid(), current_fd, buf, count);
+        return;
+    }
+}
+
 int sys_read(int fd, char *buf, int count) {
     int16_t current_fd = get_current_process_file_descriptor(fd);
-    
+
     if (current_fd == DEV_NULL) {
         buf[0] = EOF;
         return 0;
@@ -125,7 +116,7 @@ int sys_read(int fd, char *buf, int count) {
 
     if (current_fd >= BUILTIN_FDS) {
         read_pipe(get_current_pid(), current_fd, buf, count);
-        return count; // asumiendo que se lee todo lo que se pide
+        return count;
     }
 
     int i = 0;
@@ -144,16 +135,15 @@ void sys_new_size(int newSize) {
     if (newSize < 1 || newSize > 5) {
         return;
     }
-    _cli(); // por las dudas paro los in/out (antes generaba bugs)
+    _cli();
     fontSize = newSize;
-    // Clear screen and reset cursor when changing font size
+
     clearScreen(BG_COLOR);
     x = 0;
     y = 0;
     _sti();
 }
 
-// imprime caracter y modifica coordenadas. Usado para representar el stdout
 void putCharAt(uint8_t c, uint64_t *x, uint64_t *y, uint64_t foreColor, uint64_t backgroundColor) {
     if (xOutOfBounds(x)) {
         newLine(x, y);
@@ -178,10 +168,10 @@ void putCharAt(uint8_t c, uint64_t *x, uint64_t *y, uint64_t foreColor, uint64_t
 
 void deleteCharAt(uint64_t *x, uint64_t *y, uint64_t backgroundColor) {
     if (*x == 0 && *y == 0)
-        return; // no borra si no hay nada
+        return;
     *x -= FONT_WIDTH * fontSize;
     if (xOutOfBounds(x)) {
-        int lastX = ((getWidth() - 1) / (FONT_WIDTH * fontSize) - 1) * (FONT_WIDTH * fontSize); // esto hay que ponerlo en otro lado
+        int lastX = ((getWidth() - 1) / (FONT_WIDTH * fontSize) - 1) * (FONT_WIDTH * fontSize);
         *x = lastX;
         *y -= FONT_HEIGHT * fontSize;
     }
@@ -195,14 +185,13 @@ void newLine(uint64_t *x, uint64_t *y) {
 }
 
 int xOutOfBounds(uint64_t *x) {
-    return *x + FONT_WIDTH * fontSize >= getWidth() || (int)*x < 0; // casteo a int para que me tome que existen los negativos
+    return *x + FONT_WIDTH * fontSize >= getWidth() || (int)*x < 0;
 }
 
 int yOutOfBounds(uint64_t *y) {
     return *y + FONT_HEIGHT * fontSize >= getHeight() || (int)*y < 0;
 }
 
-// resetea coordenadas
 void sys_clearScreen() {
     clearScreen(BG_COLOR);
     y = 0;

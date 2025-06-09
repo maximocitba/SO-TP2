@@ -1,64 +1,46 @@
-#include <stdint.h>
 #include "lib.h"
-#include "video.h"
 #include "IO.h"
 #include "interrupts.h"
 #include "naiveConsole.h"
+#include "video.h"
+#include <stdint.h>
 
+void *memset(void *destination, int32_t c, uint64_t length) {
+    uint8_t chr = (uint8_t)c;
+    char *dst = (char *)destination;
 
-void * memset(void * destination, int32_t c, uint64_t length)
-{
-	uint8_t chr = (uint8_t)c;
-	char * dst = (char*)destination;
+    while (length--)
+        dst[length] = chr;
 
-	while(length--)
-		dst[length] = chr;
-
-	return destination;
+    return destination;
 }
 
-void * memcpy(void * destination, const void * source, uint64_t length)
-{
-	/*
-	* memcpy does not support overlapping buffers, so always do it
-	* forwards. (Don't change this without adjusting memmove.)
-	*
-	* For speedy copying, optimize the common case where both pointers
-	* and the length are word-aligned, and copy word-at-a-time instead
-	* of byte-at-a-time. Otherwise, copy by bytes.
-	*
-	* The alignment logic below should be portable. We rely on
-	* the compiler to be reasonably intelligent about optimizing
-	* the divides and modulos out. Fortunately, it is.
-	*/
-	uint64_t i;
+void *memcpy(void *destination, const void *source, uint64_t length) {
 
-	if ((uint64_t)destination % sizeof(uint32_t) == 0 &&
-		(uint64_t)source % sizeof(uint32_t) == 0 &&
-		length % sizeof(uint32_t) == 0)
-	{
-		uint32_t *d = (uint32_t *) destination;
-		const uint32_t *s = (const uint32_t *)source;
+    uint64_t i;
 
-		for (i = 0; i < length / sizeof(uint32_t); i++)
-			d[i] = s[i];
-	}
-	else
-	{
-		uint8_t * d = (uint8_t*)destination;
-		const uint8_t * s = (const uint8_t*)source;
+    if ((uint64_t)destination % sizeof(uint32_t) == 0 &&
+        (uint64_t)source % sizeof(uint32_t) == 0 &&
+        length % sizeof(uint32_t) == 0) {
+        uint32_t *d = (uint32_t *)destination;
+        const uint32_t *s = (const uint32_t *)source;
 
-		for (i = 0; i < length; i++)
-			d[i] = s[i];
-	}
+        for (i = 0; i < length / sizeof(uint32_t); i++)
+            d[i] = s[i];
+    } else {
+        uint8_t *d = (uint8_t *)destination;
+        const uint8_t *s = (const uint8_t *)source;
 
-	return destination;
+        for (i = 0; i < length; i++)
+            d[i] = s[i];
+    }
+
+    return destination;
 }
 
 int buflen(const char *s) {
     int i = 0;
-    while (*s != '\0')
-    {
+    while (*s != '\0') {
         i++;
         s++;
     }
@@ -67,16 +49,16 @@ int buflen(const char *s) {
 
 #define REGS_SIZE 18
 
-uint64_t * regs = {0};
+uint64_t *regs = {0};
 int regsCaptured = 0;
 
-char * regList[REGS_SIZE] = {
-        "RAX", "RBX", "RCX", "RDX", "RDI", "RSI","RBP", "RSP",
-        "R08", "R09", "R10", "R11", "R12", "R13", "R14",
-        "R15", "IP ", "RFLAGS "};
+char *regList[REGS_SIZE] = {
+    "RAX", "RBX", "RCX", "RDX", "RDI", "RSI", "RBP", "RSP",
+    "R08", "R09", "R10", "R11", "R12", "R13", "R14",
+    "R15", "IP ", "RFLAGS "};
 
 void getRegs() {
-    regs = storeRegs();		// llamada a Assembler
+    regs = storeRegs();
     regsCaptured = 1;
 }
 
@@ -87,13 +69,13 @@ void sys_registers() {
         printf("Tenias estos registros guardados:\n");
     }
 
-    for (int i = 0; i < REGS_SIZE ; i++) {
+    for (int i = 0; i < REGS_SIZE; i++) {
         char buf[33];
         printf(regList[i]);
         uint32_t digits = uintToBase(regs[i], buf, 16);
         printf(" : 0x");
         int zeros = 15;
-        while(zeros > digits){
+        while (zeros > digits) {
             printf("0");
             zeros--;
         }
@@ -119,7 +101,7 @@ void int_to_string(int num, char *str) {
     }
 
     while (num != 0) {
-        str[i++] = (num % 10) + '0'; 
+        str[i++] = (num % 10) + '0';
         num /= 10;
     }
 
@@ -127,7 +109,7 @@ void int_to_string(int num, char *str) {
         str[i++] = '-';
     }
 
-    str[i] = '\0'; 
+    str[i] = '\0';
 
     for (int j = 0; j < i / 2; j++) {
         char temp = str[j];
@@ -136,21 +118,19 @@ void int_to_string(int num, char *str) {
     }
 }
 
-
 void print_number(int number) {
     char buffer[20];
-    int_to_string(number, buffer); 
-    printf(buffer); 
+    int_to_string(number, buffer);
+    printf(buffer);
 }
 
-
 void pointer_to_string(void *ptr, char *buffer, size_t buffer_size) {
-    const size_t required_hex_digits = sizeof(uintptr_t) * 2; // e.g., 16 for 64-bit
+    const size_t required_hex_digits = sizeof(uintptr_t) * 2;
     const size_t required_total_size = 2 /* "0x" */ + required_hex_digits + 1 /* '\0' */;
 
     if (buffer_size < required_total_size) {
         if (buffer_size > 0) {
-            buffer[0] = '\0'; // Try to at least null-terminate
+            buffer[0] = '\0';
         }
         return;
     }
@@ -165,8 +145,8 @@ void pointer_to_string(void *ptr, char *buffer, size_t buffer_size) {
         if (nibble_value < 10) {
             buffer[index++] = '0' + nibble_value;
         } else {
-            buffer[index++] = 'a' + (nibble_value - 10); // Using lowercase 'a'-'f'
+            buffer[index++] = 'a' + (nibble_value - 10);
         }
     }
-    buffer[index] = '\0'; // Null-terminate
+    buffer[index] = '\0';
 }

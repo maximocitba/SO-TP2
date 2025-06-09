@@ -1,17 +1,16 @@
 #include "../include/process.h"
-#include "../include/linked_list.h"
 #include "../include/lib.h"
+#include "../include/linked_list.h"
 #include "../include/string.h"
-#include <stdlib.h>
 #include <IO.h>
-#include <scheduler.h>
 #include <memman.h>
-
+#include <scheduler.h>
+#include <stdlib.h>
 
 static char **alloc_args(char **args, uint64_t argc);
 
-void init_process(process_t* process, int32_t pid, function code,
-                 char** args, uint64_t argc, char* name, priority_t priority, uint8_t unkilliable) {
+void init_process(process_t *process, int32_t pid, function code,
+    char **args, uint64_t argc, char *name, priority_t priority, uint8_t unkilliable) {
     process->pid = pid;
     process->priority = priority;
     process->state = ready;
@@ -20,16 +19,15 @@ void init_process(process_t* process, int32_t pid, function code,
     process->argc = argc;
     process->name = b_alloc(strlen(name) + 1);
     memcpy(process->name, name, strlen(name) + 1);
-    
-    void* stack_end = (void*)((uint64_t)process->stack_base + stack_size);
+
+    void *stack_end = (void *)((uint64_t)process->stack_base + stack_size);
     process->stack_pointer = create_process_stack_frame(
-        (void*)code,
+        (void *)code,
         stack_end,
         process->argv,
         argc,
-        process_handler
-    );
-    
+        process_handler);
+
     process->unkilliable = unkilliable;
 
     process->parent_pid = get_current_pid();
@@ -43,65 +41,55 @@ void init_process(process_t* process, int32_t pid, function code,
     process->fg = foreground;
 }
 
-
-
-static char **alloc_args(char **args, uint64_t argc)
-{
+static char **alloc_args(char **args, uint64_t argc) {
     char **argv = b_alloc(sizeof(char *) * argc);
-    for (int i = 0; i < argc; i++)
-    {
+    for (int i = 0; i < argc; i++) {
         argv[i] = b_alloc(strlen(args[i]) + 1);
         memcpy(argv[i], args[i], strlen(args[i]) + 1);
     }
     return argv;
 }
 
-void process_handler(function code, char** argv, int argc) {
+void process_handler(function code, char **argv, int argc) {
     int64_t ret = code(argc, argv);
-    
-    process_t* current = get_current_process();
+
+    process_t *current = get_current_process();
     current->exit_code = ret;
-    
+
     kill_current_process();
-    
 }
 
-void free_process(process_t* process) {
-    // free arguments
+void free_process(process_t *process) {
+
     for (int i = 0; i < process->argc; i++) {
         b_free(process->argv[i]);
     }
 
     b_free(process->argv);
-    
+
     b_free(process->name);
-    
+
     b_free(process->stack_base);
-    
-    
+
     if (process->children != NULL && process->parent_pid != 0) {
         start_iterator(process->children);
         while (has_next(process->children)) {
-            process_t* child = (process_t*)get_next(process->children);
+            process_t *child = (process_t *)get_next(process->children);
             child->parent_pid = 0;
         }
     }
-    
- 
+
     destroy_linked_list(process->children);
-    
-  
+
     b_free(process);
 }
 
-void remove_child_process(process_t* parent, int32_t child_pid) {
-   
+void remove_child_process(process_t *parent, int32_t child_pid) {
 }
 
-process_snapshot_t *get_process_snapshot(uint32_t pid)
-{
+process_snapshot_t *get_process_snapshot(uint32_t pid) {
     process_t *process = get_process_by_pid(pid);
-    if (process == NULL || process->pid < 0 || process->pid >MAX_PROCESSES) {
+    if (process == NULL || process->pid < 0 || process->pid > MAX_PROCESSES) {
         return NULL;
     }
 

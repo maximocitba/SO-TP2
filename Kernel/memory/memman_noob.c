@@ -1,121 +1,167 @@
-
-#include <stddef.h>
+#include "lib.h"
+#include "memman.h"
 #include <stdint.h>
-#include <memman.h>
-#include <lib.h>
+#include <string.h>
 
-#define mem_block_size 4096
+#define HEAP_BITS_PER_BYTE 8
+#define BYTE_ALIGNMENT 8
+#define BYTE_ALIGNMENT_MASK 0x0007
 
-static uint64_t mem_size;
+typedef struct Node {
+    struct Node *next;
+    size_t block_size;
+} MemoryBlock;
 
+static MemoryBlock start_block;
+static MemoryBlock end_block;
+static size_t total_mem;
+static size_t used_mem;
+static unsigned int mem_chunks;
+static size_t allocated_bit;
+static const size_t struct_size = sizeof(MemoryBlock);
 
-typedef struct mem_node{
-    void *start_addr;
-    size_t size;
-    void *next;
-    uint8_t is_free;
-} mem_node;
+static void insert_block(MemoryBlock *block_to_insert);
 
-typedef struct mem_manager {
-    void *heap_start_addr;
-    void *heap_end_addr;
-    mem_node *mem_list;
-    size_t total_memory;  
-    size_t used_memory;   
-    size_t free_memory;  
-} mem_manager;
+void b_init(void *const start_address, size_t size) {
+    if (size <= sizeof(MemoryBlock) * 2)
+        return;
 
-mem_manager *memory_manager;
+    size_t true_start = (size_t)start_address;
+    if ((true_start & BYTE_ALIGNMENT_MASK) != 0) {
+        true_start += (BYTE_ALIGNMENT - (true_start & BYTE_ALIGNMENT_MASK));
+    }
 
-void b_init(void *start_addr, size_t size) {
-    mem_size = size;
-    memory_manager = (mem_manager *)start_addr;
-    memory_manager->heap_start_addr = start_addr + sizeof(mem_manager);
-    memory_manager->heap_end_addr = start_addr + size;
-    memory_manager->mem_list = NULL;
-    memory_manager->total_memory = mem_size;  
-    memory_manager->free_memory = mem_size;   
-    memory_manager->used_memory = memory_manager->total_memory - memory_manager->free_memory;       
-}
+    uint8_t *true_start_address = (uint8_t *)true_start;
+    size_t usable_size = size - (true_start - (size_t)start_address);
 
-static mem_node create_block(void *start_addr, size_t size) {
-    mem_node new_node;
-    new_node.start_addr = start_addr;
-    new_node.size = size;
-    new_node.is_free = 0;
-    new_node.next = NULL;
-    return new_node;
+    if (usable_size <= 2 * struct_size)
+        return;
+
+    usable_size -= struct_size;
+
+    MemoryBlock *first_block = (MemoryBlock *)true_start_address;
+    first_block->block_size = usable_size;
+    first_block->next = &end_block;
+
+    start_block.next = first_block;
+    start_block.block_size = 0;
+
+    end_block.block_size = 0;
+    end_block.next = NULL;
+
+    total_mem = usable_size;
+    used_mem = 0;
+    mem_chunks = 0;
+    allocated_bit = ((size_t)1) << ((sizeof(size_t) * HEAP_BITS_PER_BYTE) - 1);
 }
 
 void *b_alloc(size_t size) {
-    if (size == 0)
+    if (size == 0 || size & allocated_bit)
         return NULL;
 
-    mem_node *current_node = memory_manager->mem_list;
-    mem_node *prev_node = NULL;
-
-    while (current_node != NULL) {
-        if (current_node->is_free && current_node->size >= size) {
-            current_node->is_free = 0;
-            memory_manager->used_memory += current_node->size; 
-            memory_manager->free_memory -= current_node->size;
-            return current_node->start_addr;
-        }
-        prev_node = current_node;
-        current_node = current_node->next;
+    size += struct_size;
+    if (size & BYTE_ALIGNMENT_MASK) {
+        size += (BYTE_ALIGNMENT - (size & BYTE_ALIGNMENT_MASK));
     }
 
-    void *new_block_addr = (prev_node == NULL) ? memory_manager->heap_start_addr : prev_node->start_addr + prev_node->size;
-    if (new_block_addr + size + sizeof(mem_node) > memory_manager->heap_end_addr) {
-        return NULL; // no hay suficiente memoria
+    if (size > (total_mem - used_mem))
+        return NULL;
+
+    MemoryBlock *prev = &start_block;
+    MemoryBlock *curr = start_block.next;
+
+    while (curr != &end_block && curr->block_size < size) {
+        prev = curr;
+        curr = curr->next;
     }
 
-    mem_node *new_node = (mem_node *)new_block_addr;
-    new_node->start_addr = new_block_addr + sizeof(mem_node); 
-    new_node->size = size;
-    new_node->is_free = 0;
-    new_node->next = NULL;
+    if (curr == &end_block)
+        return NULL;
 
-    if (prev_node == NULL) {
-        memory_manager->mem_list = new_node;
-    } else {
-        prev_node->next = new_node;
+    void *return_ptr = (uint8_t *)curr + struct_size;
+    prev->next = curr->next;
+
+    size_t remaining = curr->block_size - size;
+
+    if (remaining >= (struct_size << 1)) {
+        MemoryBlock *split_block = (MemoryBlock *)((uint8_t *)curr + size);
+        split_block->block_size = remaining;
+        curr->block_size = size;
+        insert_block(split_block);
     }
 
-    memory_manager->used_memory += size; 
-    memory_manager->free_memory -= size;
+    used_mem += curr->block_size;
+    curr->block_size |= allocated_bit;
+    curr->next = NULL;
+    mem_chunks++;
 
-    return new_node->start_addr;
-    //nunca llega aca 
-     if (prev_node->start_addr + prev_node->size + size + sizeof(mem_node) > memory_manager->heap_end_addr) {
-        return (void*)0;
-    }
-    mem_node node = create_block(current_node->start_addr + current_node->size, size);
-    current_node->next = &node;
-    return node.start_addr;
+    return return_ptr;
 }
 
 void b_free(void *ptr) {
-    mem_node *current_node = memory_manager->mem_list;
-    while (current_node != NULL) {
-        if (current_node->start_addr == ptr) {
-            current_node->is_free = 1;
-            memory_manager->used_memory -= current_node->size; 
-            memory_manager->free_memory += current_node->size;
-            mem_info();
-            return;
-        }
-        current_node = current_node->next;
+    if (!ptr)
+        return;
+
+    MemoryBlock *block = (MemoryBlock *)((uint8_t *)ptr - struct_size);
+
+    if ((block->block_size & allocated_bit) == 0 || block->next != NULL)
+        return;
+
+    block->block_size &= ~allocated_bit;
+    used_mem -= block->block_size;
+    mem_chunks--;
+    insert_block(block);
+}
+
+static void insert_block(MemoryBlock *block_to_insert) {
+    MemoryBlock *iterator = &start_block;
+
+    while (iterator->next < block_to_insert && iterator->next != &end_block) {
+        iterator = iterator->next;
+    }
+
+    uint8_t *iter_end = (uint8_t *)iterator + iterator->block_size;
+    if (iter_end == (uint8_t *)block_to_insert) {
+        iterator->block_size += block_to_insert->block_size;
+        block_to_insert = iterator;
+    }
+
+    uint8_t *block_end = (uint8_t *)block_to_insert + block_to_insert->block_size;
+    if (block_end == (uint8_t *)iterator->next && iterator->next != &end_block) {
+        block_to_insert->block_size += iterator->next->block_size;
+        block_to_insert->next = iterator->next->next;
+    } else {
+        block_to_insert->next = iterator->next;
+    }
+
+    if (iterator != block_to_insert) {
+        iterator->next = block_to_insert;
     }
 }
 
-size_t * mem_info() {
-    size_t *info = (size_t *)b_alloc(3 * sizeof(size_t)); 
-    if (info == NULL) {
-        return NULL; 
+void *b_realloc(void *ptr, size_t size) {
+    if (!ptr)
+        return b_alloc(size);
+
+    MemoryBlock *block = (MemoryBlock *)((uint8_t *)ptr - struct_size);
+    size_t old_size = (block->block_size & ~allocated_bit) - struct_size;
+
+    if (size <= old_size)
+        return ptr;
+
+    void *new_ptr = b_alloc(size);
+    if (new_ptr) {
+        memcpy(new_ptr, ptr, old_size);
+        b_free(ptr);
     }
-    info[0] = memory_manager->total_memory;
-    info[1] = memory_manager->used_memory;
-    info[2] = memory_manager->free_memory;
-    return info; 
+
+    return new_ptr;
+}
+
+size_t *mem_info() {
+    static size_t info[3];
+    info[0] = total_mem;
+    info[1] = used_mem;
+    info[2] = mem_chunks;
+    return info;
 }

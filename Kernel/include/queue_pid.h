@@ -1,38 +1,38 @@
 #ifndef queue_pid_h
 #define queue_pid_h
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
-typedef struct queue_pid_cdt* queue_pid_adt;
+typedef struct queue_pid_cdt *queue_pid_adt;
 
-// creates a new empty queue
+// crea una nueva cola vacía
 queue_pid_adt create_queue(void);
 
-// adds a pid to the rear of the queue
+// agrega un pid al final de la cola
 void enqueue(queue_pid_adt queue, int64_t pid);
 
-// removes and returns the pid at the front of the queue
-// returns -1 if queue is empty
+// elimina y retorna el pid al frente de la cola
+// retorna -1 si la cola está vacía
 int64_t dequeue(queue_pid_adt queue);
 
-// returns the pid at the front without removing it
-// returns -1 if queue is empty
+// retorna el pid al frente sin eliminarlo
+// retorna -1 si la cola está vacía
 int64_t peek(queue_pid_adt queue);
 
-// returns true if the queue is empty, false otherwise
+// retorna true si la cola está vacía, false en caso contrario
 bool is_empty(queue_pid_adt queue);
 
-// returns the current number of elements in the queue
+// retorna la cantidad actual de elementos en la cola
 uint64_t get_queue_size(queue_pid_adt queue);
 
-// removes all elements from the queue
+// elimina todos los elementos de la cola
 void clear_queue(queue_pid_adt queue);
 
-// checks if a specific pid exists in the queue
+// verifica si un pid específico existe en la cola
 bool contains_pid(queue_pid_adt queue, int64_t pid);
 
-// frees all memory associated with the queue
+// libera toda la memoria asociada a la cola
 void destroy_queue(queue_pid_adt queue);
 
 void dequeue_pid(queue_pid_adt queue, int64_t pid);
