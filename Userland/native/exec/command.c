@@ -282,22 +282,31 @@ int echo(int argc, char **argv) {
     return 0;
 }
 
-//TODO: disable non-piped usage of cat
 int cat(int argc, char **argv) {
-    int input = 0;
-
-    while (1) {
-        input = getchar();
-        if (input == EOF) {
-            return 0; // Exit on EOF
-        }
-        putchar(input); // Echo the character
+    // Check if stdin is connected to a pipe (not the default stdin)
+    if (sys_get_current_fd(STDIN) == STDIN) {
+        printf("cat: This command can only be used with pipes\n");
+        printf("Usage: command | cat\n");
+        return 1;
     }
-    return 0; // Should not be reached
+    
+    int input = 0;
+    // Read from stdin until EOF
+    // and echo each character to stdout
+    while ((input = getchar()) != EOF) {
+        putchar(input);
+    }
+    return 0;
 }
 
-//TODO: disable non-piped usage of wc
 int wc(int argc, char **argv) {
+    // Check if stdin is connected to a pipe (not the default stdin)
+    if (sys_get_current_fd(STDIN) == STDIN) {
+        printf("wc: This command can only be used with pipes\n");
+        printf("Usage: command | wc\n");
+        return 1;
+    }
+    
     int input = 0;
     int lines = 0;
     while ((input = getchar()) != EOF) {
@@ -309,8 +318,14 @@ int wc(int argc, char **argv) {
     return 0;
 }
 
-//TODO: disable non-piped usage of filter
 int filter(int argc, char **argv) {
+    // Check if stdin is connected to a pipe (not the default stdin)
+    if (sys_get_current_fd(STDIN) == STDIN) {
+        printf("filter: This command can only be used with pipes\n");
+        printf("Usage: command | filter\n");
+        return 1;
+    }
+    
     int input = 0;
     while ((input = getchar()) != EOF) {
         if (!isVowel(input)) {

@@ -49,6 +49,7 @@
 #define SYS_GET_ALL_PROCESSES_INFO 36
 #define SYS_TOGGLE_BLOCK_STATE 37
 #define SYS_GET_MEM_INFO 38
+#define SYS_GET_CURRENT_FD 39
 
 uint64_t registers[18] = {0};
 
@@ -153,6 +154,8 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
         return toggle_process_block_state((uint32_t)param_1);
     case SYS_GET_MEM_INFO:
         return (uint64_t)mem_info();
+    case SYS_GET_CURRENT_FD:
+        return get_current_process_file_descriptor((uint8_t)param_1);
     }
     return 0;
 }

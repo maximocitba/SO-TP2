@@ -157,3 +157,7 @@ int sys_toggle_block_state(uint32_t pid) {
 uint64_t* sys_get_mem_info() {
     return (uint64_t*)syscall(SYS_GET_MEM_INFO, 0, 0, 0, 0, 0);
 }
+
+uint16_t sys_get_current_fd(uint16_t fd_index) {
+    return syscall(SYS_GET_CURRENT_FD, fd_index, 0, 0, 0, 0);
+}
