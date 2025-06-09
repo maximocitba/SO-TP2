@@ -1,5 +1,3 @@
-// This is a personal academic project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/scheduler.h"
 #include "../include/linked_list.h"
 #include "../include/queue_pid.h"
@@ -205,17 +203,6 @@ int32_t create_process(function code, char **args, int argc, char *name, uint8_t
     return process->pid;
 }
 
-// void waitpid(uint32_t child_pid) {
-//     process_t *parent = get_current_process();
-//     process_t *child = get_process_by_pid(child_pid);
-//     if (child == NULL || child->parent_pid != parent->pid) {
-//         return;
-//     }
-
-//     add_node(parent->children, (void *)child);
-//     parent->state = waiting_for_child;
-//     yield();
-// }
 
 void waitpid(uint32_t child_pid) {
     process_t *parent = get_current_process();
@@ -239,7 +226,7 @@ void waitpid(uint32_t child_pid) {
     while (1) {
         child = get_process_by_pid(child_pid);
         if (child == NULL || child->state == killed) break;
-        yield();  // esperar al hijo
+        yield();  
     }
 
     remove_node(parent->children, child);
@@ -314,7 +301,6 @@ int kill_process(uint32_t pid) {
         return -1;
     }
 
-    // remove_from_all_semaphores(pid); // Rehabilitar si usás semáforos
 
     if (process_to_kill->state == blocked) {
         remove_all_nodes(scheduler->blocked_process_list, (void *)process_to_kill);
@@ -322,7 +308,7 @@ int kill_process(uint32_t pid) {
         remove_all_nodes(scheduler->process_list, (void *)process_to_kill);
     }
 
-    // Reasignar hijos al idle
+
     for (int i = 0; i < MAX_PROCESSES; i++) {
         if (scheduler->processes[i] != NULL) {
             process_t *process = (process_t *)scheduler->processes[i]->process;

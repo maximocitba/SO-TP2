@@ -87,7 +87,6 @@ test_sync(uint64_t argc, char *argv[]) {
 
     printf("Final value: ");
 
-    // sys_sleep(1000);  // Sleep to ensure all processes have finished before printing
     printf("%d\n", global);
 
     return 0;

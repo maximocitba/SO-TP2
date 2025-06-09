@@ -1,5 +1,4 @@
-// This is a personal academic project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
 #include "../include/semaphore.h"
 #include "../include/IO.h"
 #include "../include/linked_list.h"
@@ -90,7 +89,7 @@ int sem_wait(Semaphore sem) {
         asm_unlock(&semaphores[sem]->lock);
         block_process(pid);
         yield();
-        // Se queda esperando a que se desloquee
+
         asm_lock(&semaphores[sem]->lock);
     }
 
