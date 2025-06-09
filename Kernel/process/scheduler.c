@@ -225,24 +225,21 @@ void waitpid(uint32_t child_pid) {
         return;
     }
 
-    // Si ya terminó, no hay que esperar
     if (child->state == killed) {
         remove_node(parent->children, child);
         return;
     }
 
-    // Registrar que el padre está esperando a ese hijo
     if (get_node(parent->children, child) == NULL) {
         add_node(parent->children, child);
     }
 
-    // Bloqueo activo hasta que el hijo termine
-    while (child->state != killed) {
-        parent->state = waiting_for_child;
-        yield();
-        // El scheduler lo despertará si no tiene más hijos vivos
+    parent->state = waiting_for_child;
+
+    while (1) {
         child = get_process_by_pid(child_pid);
-        if (child == NULL) break;  // Por si fue liberado en paralelo
+        if (child == NULL || child->state == killed) break;
+        yield();  // esperar al hijo
     }
 
     remove_node(parent->children, child);
@@ -317,50 +314,40 @@ int kill_process(uint32_t pid) {
         return -1;
     }
 
-    // remove_from_all_semaphores(pid);
+    // remove_from_all_semaphores(pid); // Rehabilitar si usás semáforos
 
     if (process_to_kill->state == blocked) {
-
         remove_all_nodes(scheduler->blocked_process_list, (void *)process_to_kill);
     } else {
-
         remove_all_nodes(scheduler->process_list, (void *)process_to_kill);
     }
 
+    // Reasignar hijos al idle
     for (int i = 0; i < MAX_PROCESSES; i++) {
         if (scheduler->processes[i] != NULL) {
             process_t *process = (process_t *)scheduler->processes[i]->process;
             if (process->parent_pid == pid) {
+                process->parent_pid = idle_pid;
                 if (process->state == running || process->state == ready) {
-                    process->state = waiting_for_child;
                     block_process(process->pid);
-                    process->parent_pid = idle_pid;
                     unblock_process(process->pid);
-                } else if (process->state == blocked) {
-                    process->parent_pid = idle_pid;
                 }
-              
             }
         }
     }
 
+    // Marcar como killed y liberar
     scheduler->next_unused_pid = pid;
-
+    process_to_kill->state = killed;
     free_process(process_to_kill);
     scheduler->remaining_processes--;
-    process_to_kill->state = killed;
 
-    // if (process_to_kill->parent_pid != idle_pid) {
-    //     process_t *parent = get_process_by_pid(process_to_kill->parent_pid);
-    //     if (parent != NULL) {
-    //         remove_node(parent->children, process_to_kill);
-    //     }
-    // }
-        if (process_to_kill->parent_pid != idle_pid) {
+    // Notificar al padre si estaba esperando
+    if (process_to_kill->parent_pid != idle_pid) {
         process_t *parent = get_process_by_pid(process_to_kill->parent_pid);
-        if (parent != NULL && parent->state == waiting_for_child) {
-            // Si no quedan más hijos vivos, lo desbloqueamos
-            if (is_empty_list(parent->children)) {
+        if (parent != NULL) {
+            remove_node(parent->children, process_to_kill);
+            if (parent->state == waiting_for_child && is_empty_list(parent->children)) {
                 unblock_process(parent->pid);
                 parent->state = ready;
             }
@@ -483,23 +470,33 @@ void set_bg_process(uint32_t pid) {
 int get_all_processes_info(ps_info_t *buffer, int max_len) {
     scheduler_adt scheduler = get_scheduler_adt();
     int count = 0;
+
     for (int i = 0; i < MAX_PROCESSES && count < max_len; i++) {
-        process_t *process_i = (process_t *)scheduler->processes[i]->process;
-        if (scheduler->processes[i] != NULL && scheduler->processes[i]->process != NULL && process_i->state != killed) {
-            process_t *p = (process_t *)scheduler->processes[i]->process;
-            buffer[count].pid = p->pid;
-            buffer[count].priority = p->priority;
-            buffer[count].state = p->state;
-            memcpy(buffer[count].name, p->name, strlen(p->name) + 1);
-            pointer_to_string(p->stack_pointer, buffer[count].stack_pointer_str, MAX_PTR_STR_LEN);
-            pointer_to_string(p->stack_base, buffer[count].base_pointer_str, MAX_PTR_STR_LEN);
-            buffer[count].fg = p->fg;
-            buffer[count].parent_pid = p->parent_pid;
-            count++;
+        if (scheduler->processes[i] == NULL || scheduler->processes[i]->process == NULL) {
+            continue;
         }
+
+        process_t *p = (process_t *)scheduler->processes[i]->process;
+
+        if (p->state == killed || p->pid > 100) {
+            continue;
+        }
+
+        buffer[count].pid = p->pid;
+        buffer[count].priority = p->priority;
+        buffer[count].state = p->state;
+        memcpy(buffer[count].name, p->name, strlen(p->name) + 1);
+        pointer_to_string(p->stack_pointer, buffer[count].stack_pointer_str, MAX_PTR_STR_LEN);
+        pointer_to_string(p->stack_base, buffer[count].base_pointer_str, MAX_PTR_STR_LEN);
+        buffer[count].fg = p->fg;
+        buffer[count].parent_pid = p->parent_pid;
+
+        count++;
     }
+
     return count;
 }
+
 
 int toggle_process_block_state(uint32_t pid) {
     scheduler_adt scheduler = get_scheduler_adt();

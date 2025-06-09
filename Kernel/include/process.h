@@ -32,7 +32,7 @@ void process_handler(function code, char **argv, int argc);
 void init_process(process_t *process, int32_t pid, function code, char **args, uint64_t argc, char *name, priority_t priority, uint8_t unkilliable);
 extern void *create_process_stack_frame(void *rip, void *rsp, void *argv, uint64_t argc, void *process_handler);
 void free_process(process_t *process);
-void remove_child_process(process_t *parent, int32_t child_pid);
+
 process_snapshot_t *get_process_snapshot(uint32_t pid);
 
 #endif
