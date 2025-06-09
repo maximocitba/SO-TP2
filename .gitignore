@@ -314,3 +314,7 @@ Thumbs.db
 TP 2.pdf
 .vscode/*
 .vscode/settings.json
+.PVS-Studio/
+.PVS-Studio/*
+report.tasks
+strace_out
