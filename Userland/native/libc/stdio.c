@@ -49,7 +49,6 @@ uint64_t vprintf_color(const char *fmt, uint64_t foreground, uint64_t background
         if (fmt[i] == '%') {
             i++;
             switch (fmt[i]) {
-                // ...existing code...
             case 'd': {
                 int val = va_arg(args, int);
                 if (val < 0) {
@@ -64,7 +63,6 @@ uint64_t vprintf_color(const char *fmt, uint64_t foreground, uint64_t background
                 }
                 break;
             }
-                // ...existing code...
             case 's': {
                 char *s = va_arg(args, char *);
                 if (s == ((char *)0)) {
@@ -86,6 +84,12 @@ uint64_t vprintf_color(const char *fmt, uint64_t foreground, uint64_t background
                         char_count++;
                     }
                 }
+                break;
+            }
+            case 'c': {
+                char c = (char)va_arg(args, int); // char is promoted to int in va_arg
+                putcharColoured(c, foreground, background);
+                char_count++;
                 break;
             }
             case '%': {

@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #define MAX_BUF 1024
+#define NULL ((void *)0)
 
 void putchar(char c);
 void putcharColoured(char c, uint64_t foreground, uint64_t background);
