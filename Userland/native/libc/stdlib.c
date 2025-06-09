@@ -19,6 +19,11 @@ uint64_t getchar() {
     return c;
 }
 
+int isVowel(int c) {
+    return (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u' ||
+            c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U');
+}
+
 
 uint64_t gets(char * buf, uint64_t length) {
     char c;

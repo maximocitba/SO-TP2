@@ -33,7 +33,10 @@ command_t commands[] = {
     {"kill", "mata un proceso por ID", (function)kill_command},
     {"nice", "cambia la prioridad de un proceso", (function)nice_command},
     {"block", "bloquea/desbloquea un proceso por ID", (function)block_command},
-    {"cat", "imprime el stdin tal como lo recibe", (function)cat}
+    {"cat", "imprime el stdin tal como lo recibe", (function)cat},
+    {"echo", "imprime en stdout el argumento", (function)echo},
+    {"wc", "cuenta las lineas", (function)wc},
+    {"filter", "filtra las vocales del input", (function)filter}
 };
 
 static void parse_buffer(char *buff, parsed_input_t *parsed);

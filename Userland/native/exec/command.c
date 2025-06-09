@@ -155,8 +155,8 @@ void ps_command() {
         }
         char *fg_bg_str = (processes[i].fg == foreground) ? "FG" : "BG";
 
-        // Removed format specifiers for alignment and width
-        printf("%d | %d | %d | %s | %s | %s | %s | %s\n",
+
+        printf("%d | %d | %d | %s | %s | %s | %s | %s \n",
             processes[i].pid,
             processes[i].parent_pid,
             processes[i].priority,
@@ -232,16 +232,51 @@ int block_command(int argc, char **argv) {
     return 0;
 }
 
+int echo(int argc, char **argv) {
+    for (int i = 0; i < argc; i++) {
+        printf("%s", argv[i]);
+        if (i < argc - 1) {
+            printf(" ");
+        }
+    }
+    printf("\n");
+    return 0;
+}
+
+//TODO: disable non-piped usage of cat
 int cat(int argc, char **argv) {
-    char c;
+    int input = 0;
 
     while (1) {
-        sys_read(0, &c, 1);
-        if (c == EOF) {
+        input = getchar();
+        if (input == EOF) {
             return 0; // Exit on EOF
         }
-        putchar(c); // Echo the character
+        putchar(input); // Echo the character
     }
+    return 0; // Should not be reached
+}
 
-    return 0; // This line is never reached, but keeps the compiler happy
+//TODO: disable non-piped usage of wc
+int wc(int argc, char **argv) {
+    int input = 0;
+    int lines = 0;
+    while ((input = getchar()) != EOF) {
+        if (input == '\n') {
+            lines++;
+        }
+    }
+    printf("Lines: %d\n", lines);
+    return 0;
+}
+
+//TODO: disable non-piped usage of filter
+int filter(int argc, char **argv) {
+    int input = 0;
+    while ((input = getchar()) != EOF) {
+        if (!isVowel(input)) {
+            putchar(input); // Echo the character if it matches the filter
+        }
+    }
+    return 0;
 }
