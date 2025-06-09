@@ -20,6 +20,18 @@ if ! command -v plog-converter &> /dev/null; then
     exit 1
 fi
 
+# Add PVS-Studio headers to C files that don't have them
+echo "Checking and adding PVS-Studio headers to C files..."
+find /home/maxi/Desktop/SO/SO-TP2 -name "*.c" -type f | while read file; do
+    # Check if the file already has the PVS-Studio header
+    if ! grep -q "This is a personal academic project. Dear PVS-Studio, please check it." "$file"; then
+        echo "Adding PVS header to: $file"
+        sed -i '1i// This is a personal academic project. Dear PVS-Studio, please check it.\n// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com' "$file"
+    else
+        echo "PVS header already present in: $file"
+    fi
+done
+
 # Activate PVS-Studio free license
 echo "Activating PVS-Studio free license..."
 pvs-studio-analyzer credentials "PVS-Studio Free" "FREE-FREE-FREE-FREE"
