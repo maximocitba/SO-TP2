@@ -25,6 +25,10 @@ global acquire, release
 
 global asm_do_timer_tick
 
+global asm_lock
+global asm_unlock
+
+
 EXTERN main
 EXTERN getStackBase
 EXTERN int80Dispacher
@@ -347,6 +351,18 @@ acquire:
     ret                 ; If it was unlocked (0), we got the lock
 release:
     mov DWORD [rdi], 1  ; Set to unlocked
+    ret
+
+asm_lock:
+    mov rax,0
+    mov al,1
+    xchg al,[rdi]
+    cmp al,0
+    jne asm_lock
+    ret
+
+asm_unlock:
+    mov byte [rdi],0
     ret
 	
 SECTION .bss

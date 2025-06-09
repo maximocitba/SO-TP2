@@ -31,3 +31,13 @@ int strlen(const char * str) {
     }
     return len;
 }
+
+char*
+strcpy(char* destination, const char* source)
+{
+	char* w;
+	for (w = destination; *source != '\0'; *(w++) = *(source++))
+		continue;
+	*w = '\0';
+	return destination;
+}

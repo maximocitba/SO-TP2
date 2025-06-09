@@ -4,141 +4,170 @@
 #include "../include/memman.h"
 #include "../include/queue_pid.h"
 #include "../include/scheduler.h"
+#include "../include/string.h"
 
-static sem_t *semaphores[max_semaphores] = {NULL};
+#define MAX_NAME 32
 
-static int find_semaphore(int64_t id) {
-    for (int i = 0; i < max_semaphores; i++) {
-        if (semaphores[i] != NULL && semaphores[i]->id == id) {
-            return i;
-        }
+typedef struct
+{
+    uint8_t value;
+    int8_t lock;
+    uint8_t linked_processes;
+    char name[MAX_NAME];
+    queue_pid_adt waiting_processes;
+} SemInfo;
+
+static SemInfo *semaphores[MAX_SEMAPHORES];
+static int8_t big_lock;
+
+static int search_next();
+static int search_semaphore(const char *name);
+static int create(int idx, int initial_value);
+static void free(Semaphore sem);
+static int is_valid_id(Semaphore sem);
+static int is_valid_sem(Semaphore sem);
+
+Semaphore
+sem_open(const char *name, uint8_t initial_value) {
+    asm_lock(&big_lock);
+    int i = search_semaphore(name);
+    if (i != -1) {
+        semaphores[i]->linked_processes++;
+        asm_unlock(&big_lock);
+        return (Semaphore)i;
     }
-    return -1;
-}
 
-static void lock_semaphore(sem_t *sem) {
-    acquire(&sem->mutex);
-}
-
-static void unlock_semaphore(sem_t *sem) {
-    release(&sem->mutex);
-}
-
-int32_t sem_open(int64_t id, int64_t initial_value) {
-
-    int find = find_semaphore(id);
-    if (find != -1) {
-        return find;
+    i = search_next();
+    if (i == -1) {
+        asm_unlock(&big_lock);
+        return -1;
     }
-    if (semaphores[id] == NULL) {
-        semaphores[id] = (sem_t *)b_alloc(sizeof(sem_t));
-        semaphores[id]->id = id;
-        semaphores[id]->value = initial_value;
-        semaphores[id]->mutex = 1;
-        semaphores[id]->waiting_list = create_queue();
+
+    int idx = create(i, initial_value);
+    if (idx == -1) {
+        asm_unlock(&big_lock);
+        return -1;
+    }
+    strcpy(semaphores[idx]->name, name);
+    asm_unlock(&big_lock);
+    return (Semaphore)idx;
+}
+
+int sem_close(Semaphore sem) {
+    asm_lock(&big_lock);
+    if (!is_valid_sem(sem)) {
+        asm_unlock(&big_lock);
+        return -1;
+    }
+
+    asm_lock(&(semaphores[sem]->lock));
+    asm_unlock(&big_lock);
+    if (semaphores[sem]->linked_processes == 1) {
+        semaphores[sem]->linked_processes = 0;
+        free(sem);
         return 0;
     }
-    return -1;
+
+    semaphores[sem]->linked_processes--;
+    asm_unlock(&semaphores[sem]->lock);
+    return 0;
 }
 
-int32_t sem_create(int64_t initial_value) {
-    for (int i = 0; i < max_semaphores; i++) {
-        if (semaphores[i] == NULL) {
-            int64_t id = 1;
-            while (find_semaphore(id) != -1) {
-                id++;
-            }
-            if (sem_open(id, initial_value) == 0) {
-                return id;
-            }
-            return -1;
-        }
+int sem_wait(Semaphore sem) {
+    asm_lock(&big_lock);
+    if (!is_valid_sem(sem)) {
+        asm_unlock(&big_lock);
+        return -1;
     }
-    return -1;
-}
+    asm_lock(&semaphores[sem]->lock);
+    asm_unlock(&big_lock);
 
-void sem_wait(int64_t id) {
-    int idx = find_semaphore(id);
-    if (idx == -1) {
-        return;
-    }
-
-    sem_t *sem = semaphores[idx];
-
-    lock_semaphore(sem);
-
-    while (sem->value == 0) {
-        int64_t current_pid = get_current_pid();
-        enqueue(sem->waiting_list, current_pid);
-
-        unlock_semaphore(sem);
-        block_process(current_pid);
+    uint8_t pid = get_current_pid();
+    while (semaphores[sem]->value == 0) {
+        enqueue(semaphores[sem]->waiting_processes, pid);
+        asm_unlock(&semaphores[sem]->lock);
+        block_process(pid);
         yield();
-        lock_semaphore(sem);
+        // Se queda esperando a que se desloquee
+        asm_lock(&semaphores[sem]->lock);
     }
 
-    sem->value--;
-
-    unlock_semaphore(sem);
+    semaphores[sem]->value--;
+    asm_unlock(&semaphores[sem]->lock);
+    return 0;
 }
 
-void sem_post(int64_t id) {
-    int idx = find_semaphore(id);
-    if (idx == -1) {
-        return;
+int sem_post(Semaphore sem) {
+    asm_lock(&big_lock);
+    if (!is_valid_sem(sem)) {
+        asm_unlock(&big_lock);
+        return -1;
     }
 
-    sem_t *sem = semaphores[idx];
+    asm_lock(&semaphores[sem]->lock);
+    asm_unlock(&big_lock);
 
-    lock_semaphore(sem);
-
-    sem->value++;
-
-    if (sem->value != 0) {
-        int64_t waiting_pid = peek(sem->waiting_list);
-        if (waiting_pid != -1) {
-            dequeue(sem->waiting_list);
-            unblock_process(waiting_pid);
-        }
+    semaphores[sem]->value++;
+    int pid = dequeue(semaphores[sem]->waiting_processes);
+    if (pid != -1) {
+        unblock_process(pid);
     }
-
-    unlock_semaphore(sem);
+    asm_unlock(&semaphores[sem]->lock);
+    return 0;
 }
 
-void sem_close(int64_t id) {
-    int idx = find_semaphore(id);
-    if (idx == -1) {
-        return;
+static int
+search_semaphore(const char *name) {
+    for (int i = 0; i < MAX_SEMAPHORES; i++) {
+        if (semaphores[i] != NULL && strcmp(name, semaphores[i]->name) == 0)
+            return i;
     }
-
-    destroy_queue(semaphores[idx]->waiting_list);
-    b_free(semaphores[idx]);
-    semaphores[idx] = NULL;
+    return -1;
 }
 
-void sem_cleanup_process(int64_t pid) {
-
-    for (int i = 0; i < max_semaphores; i++) {
-        if (semaphores[i] != NULL) {
-
-            queue_pid_adt new_waiting_list = create_queue();
-
-            while (!is_empty(semaphores[i]->waiting_list)) {
-                int64_t current_pid = dequeue(semaphores[i]->waiting_list);
-                if (current_pid != pid) {
-                    enqueue(new_waiting_list, current_pid);
-                }
-            }
-            destroy_queue(semaphores[i]->waiting_list);
-            semaphores[i]->waiting_list = new_waiting_list;
-        }
+static int
+search_next() {
+    for (int i = 0; i < MAX_SEMAPHORES; i++) {
+        if (semaphores[i] == NULL)
+            return i;
     }
+    return -1;
 }
 
-void remove_from_all_semaphores(uint32_t pid) {
-    for (int i = 0; i < max_semaphores; i++) {
-        if (semaphores[i] != NULL) {
-            dequeue_pid(semaphores[i]->waiting_list, pid);
-        }
+static int
+create(int idx, int initial_value) {
+    semaphores[idx] = b_alloc(sizeof(SemInfo));
+    if (semaphores[idx] == NULL)
+        return -1;
+
+    semaphores[idx]->value = initial_value;
+    semaphores[idx]->lock = 0;
+    semaphores[idx]->linked_processes = 1;
+    semaphores[idx]->waiting_processes = create_queue();
+
+    if (semaphores[idx]->waiting_processes == NULL) {
+        b_free(semaphores[idx]);
+        semaphores[idx] = NULL;
+        return -1;
     }
+
+    return (Semaphore)idx;
+}
+
+static void
+free(Semaphore sem) {
+    destroy_queue(semaphores[sem]->waiting_processes);
+    asm_unlock(&semaphores[sem]->lock);
+    b_free(semaphores[sem]);
+    semaphores[sem] = NULL;
+}
+
+static int
+is_valid_id(Semaphore sem) {
+    return sem >= 0 && sem < MAX_SEMAPHORES;
+}
+
+static int
+is_valid_sem(Semaphore sem) {
+    return is_valid_id(sem) && semaphores[sem] != NULL;
 }

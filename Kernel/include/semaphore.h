@@ -5,24 +5,18 @@
 #include "../include/queue_pid.h"
 #include <stdint.h>
 
-#define max_semaphores (1 << 6)
 
-typedef struct {
-    int64_t id;
-    int64_t value;
-    int8_t mutex;
-    queue_pid_adt waiting_list;
-} sem_t;
+#define MAX_SEMAPHORES 32
 
-int32_t sem_open(int64_t id, int64_t initial_value);
-int32_t sem_create(int64_t initial_value);
-void sem_close(int64_t id);
-void sem_wait(int64_t id);
-void sem_post(int64_t id);
-void sem_cleanup_process(int64_t pid);
-void remove_from_all_semaphores(uint32_t pid);
+typedef int Semaphore;
 
-extern void acquire(int8_t *lock);
-extern void release(int8_t *lock);
+Semaphore sem_open(const char* name, uint8_t init_value);
+int sem_close(Semaphore sem);
 
+int sem_wait(Semaphore sem);
+int sem_post(Semaphore sem);
+
+
+extern int asm_lock(int8_t* lock);
+extern void asm_unlock(int8_t* lock);
 #endif

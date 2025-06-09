@@ -203,17 +203,50 @@ int32_t create_process(function code, char **args, int argc, char *name, uint8_t
     return process->pid;
 }
 
+// void waitpid(uint32_t child_pid) {
+//     process_t *parent = get_current_process();
+//     process_t *child = get_process_by_pid(child_pid);
+//     if (child == NULL || child->parent_pid != parent->pid) {
+//         return;
+//     }
+
+//     add_node(parent->children, (void *)child);
+//     parent->state = waiting_for_child;
+//     yield();
+// }
+
 void waitpid(uint32_t child_pid) {
     process_t *parent = get_current_process();
     process_t *child = get_process_by_pid(child_pid);
+
     if (child == NULL || child->parent_pid != parent->pid) {
         return;
     }
 
-    add_node(parent->children, (void *)child);
-    parent->state = waiting_for_child;
-    yield();
+    // Si ya terminó, no hay que esperar
+    if (child->state == killed) {
+        remove_node(parent->children, child);
+        return;
+    }
+
+    // Registrar que el padre está esperando a ese hijo
+    if (get_node(parent->children, child) == NULL) {
+        add_node(parent->children, child);
+    }
+
+    // Bloqueo activo hasta que el hijo termine
+    while (child->state != killed) {
+        parent->state = waiting_for_child;
+        yield();
+        // El scheduler lo despertará si no tiene más hijos vivos
+        child = get_process_by_pid(child_pid);
+        if (child == NULL) break;  // Por si fue liberado en paralelo
+    }
+
+    remove_node(parent->children, child);
+    parent->state = ready;
 }
+
 
 process_t *get_current_process() {
     scheduler_adt scheduler = get_scheduler_adt();
@@ -282,7 +315,7 @@ int kill_process(uint32_t pid) {
         return -1;
     }
 
-    remove_from_all_semaphores(pid);
+    // remove_from_all_semaphores(pid);
 
     if (process_to_kill->state == blocked) {
 
@@ -296,8 +329,15 @@ int kill_process(uint32_t pid) {
         if (scheduler->processes[i] != NULL) {
             process_t *process = (process_t *)scheduler->processes[i]->process;
             if (process->parent_pid == pid) {
-                block_process(process->pid);
-                process->parent_pid = idle_pid;
+                if (process->state == running || process->state == ready) {
+                    process->state = waiting_for_child;
+                    block_process(process->pid);
+                    process->parent_pid = idle_pid;
+                    unblock_process(process->pid);
+                } else if (process->state == blocked) {
+                    process->parent_pid = idle_pid;
+                }
+              
             }
         }
     }
@@ -308,10 +348,20 @@ int kill_process(uint32_t pid) {
     scheduler->remaining_processes--;
     process_to_kill->state = killed;
 
-    if (process_to_kill->parent_pid != idle_pid) {
+    // if (process_to_kill->parent_pid != idle_pid) {
+    //     process_t *parent = get_process_by_pid(process_to_kill->parent_pid);
+    //     if (parent != NULL) {
+    //         remove_node(parent->children, process_to_kill);
+    //     }
+    // }
+        if (process_to_kill->parent_pid != idle_pid) {
         process_t *parent = get_process_by_pid(process_to_kill->parent_pid);
-        if (parent != NULL) {
-            remove_node(parent->children, process_to_kill);
+        if (parent != NULL && parent->state == waiting_for_child) {
+            // Si no quedan más hijos vivos, lo desbloqueamos
+            if (is_empty_list(parent->children)) {
+                unblock_process(parent->pid);
+                parent->state = ready;
+            }
         }
     }
 
