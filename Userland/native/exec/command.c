@@ -57,16 +57,25 @@ void changeSize_5() {
 
 void test_mem(uint64_t argc, char *argv[]) {
     if (argc != 1) {
-        printf("usage: test_mm <n>\n");
+        printf("uso: testmem <n>\n");
         return;
     }
 
     test_mm(argv[0] ? satoi(argv[0]) : 0); //{n, 0, 0}
 }
 
-void test_proc() {
+void test_proc(uint64_t argc, char *argv[]) {
+    if (argc != 1) {
+        printf("uso: testproc <n>\n");
+        return;
+    }
 
-    test_processes(5, NULL);
+    if (satoi(argv[0]) <= 0 || satoi(argv[0]) > 15) {
+        printf("n debe estar entre 1 y %d\n", 15);
+        return;
+    }
+
+    test_processes(satoi(argv[0]), NULL);
 }
 
 void test_prior() {
@@ -77,7 +86,7 @@ void test_prior() {
 
 void test_syncro(uint64_t argc, char *argv[]) {
     if (argc != 2) {
-        printf("usage: test_synchro <n> <use_sem>\n");
+        printf("uso: testsync <n> <use_sem>\n");
         return;
     }
     test_sync(argc, argv); //{n, use_sem, 0}
