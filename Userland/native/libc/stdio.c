@@ -63,6 +63,67 @@ uint64_t vprintf_color(const char *fmt, uint64_t foreground, uint64_t background
                 }
                 break;
             }
+            case 'u': {
+                unsigned int val = va_arg(args, unsigned int);
+                uintToBase(val, num_buf, 10);
+                for (int k = 0; num_buf[k]; k++) {
+                    putcharColoured(num_buf[k], foreground, background);
+                    char_count++;
+                }
+                break;
+            }
+            case 'x': {
+                unsigned int val = va_arg(args, unsigned int);
+                uintToBase(val, num_buf, 16);
+                // Convert to lowercase
+                for (int k = 0; num_buf[k]; k++) {
+                    if (num_buf[k] >= 'A' && num_buf[k] <= 'F') {
+                        num_buf[k] = num_buf[k] - 'A' + 'a';
+                    }
+                }
+                for (int k = 0; num_buf[k]; k++) {
+                    putcharColoured(num_buf[k], foreground, background);
+                    char_count++;
+                }
+                break;
+            }
+            case 'X': {
+                unsigned int val = va_arg(args, unsigned int);
+                uintToBase(val, num_buf, 16);
+                for (int k = 0; num_buf[k]; k++) {
+                    putcharColoured(num_buf[k], foreground, background);
+                    char_count++;
+                }
+                break;
+            }
+            case 'o': {
+                unsigned int val = va_arg(args, unsigned int);
+                uintToBase(val, num_buf, 8);
+                for (int k = 0; num_buf[k]; k++) {
+                    putcharColoured(num_buf[k], foreground, background);
+                    char_count++;
+                }
+                break;
+            }
+            case 'p': {
+                void *ptr = va_arg(args, void *);
+                putcharColoured('0', foreground, background);
+                char_count++;
+                putcharColoured('x', foreground, background);
+                char_count++;
+                uintToBase((uint64_t)ptr, num_buf, 16);
+                // Convert to lowercase
+                for (int k = 0; num_buf[k]; k++) {
+                    if (num_buf[k] >= 'A' && num_buf[k] <= 'F') {
+                        num_buf[k] = num_buf[k] - 'A' + 'a';
+                    }
+                }
+                for (int k = 0; num_buf[k]; k++) {
+                    putcharColoured(num_buf[k], foreground, background);
+                    char_count++;
+                }
+                break;
+            }
             case 's': {
                 char *s = va_arg(args, char *);
                 if (s == ((char *)0)) {

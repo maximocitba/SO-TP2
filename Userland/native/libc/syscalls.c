@@ -153,3 +153,7 @@ int sys_get_all_processes_info(ps_info_t* buffer, int max_len) {
 int sys_toggle_block_state(uint32_t pid) {
     return syscall(SYS_TOGGLE_BLOCK_STATE, pid, 0, 0, 0, 0);
 }
+
+uint64_t* sys_get_mem_info() {
+    return (uint64_t*)syscall(SYS_GET_MEM_INFO, 0, 0, 0, 0, 0);
+}

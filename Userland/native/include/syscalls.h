@@ -39,6 +39,7 @@
 #define SYS_CLOSE_PIPE_BY_PID 35
 #define SYS_GET_ALL_PROCESSES_INFO 36
 #define SYS_TOGGLE_BLOCK_STATE 37
+#define SYS_GET_MEM_INFO 38
 
 #include <stdint.h>
 #include "../include/definitions.h"
@@ -111,5 +112,6 @@ uint16_t sys_close_pipe_by_pid(uint16_t pid, uint16_t pipe_id);
 
 int sys_get_all_processes_info(ps_info_t* buffer, int max_len);
 int sys_toggle_block_state(uint32_t pid);
+uint64_t* sys_get_mem_info();
 
 #endif //TPE_ARQUI_SYSCALLS_H

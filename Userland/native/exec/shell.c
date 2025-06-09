@@ -37,7 +37,8 @@ command_t commands[] = {
     {"echo", "imprime en stdout el argumento", (function)echo},
     {"wc", "cuenta las lineas", (function)wc},
     {"filter", "filtra las vocales del input", (function)filter},
-    {"phylo", "ejecuta el problema de los filosofos", (function)phylo}
+    {"phylo", "ejecuta el problema de los filosofos", (function)phylo},
+    {"mem", "muestra el estado de la memoria", (function)mem_command}
 };
 
 static void parse_buffer(char *buff, parsed_input_t *parsed);

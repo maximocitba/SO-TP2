@@ -168,6 +168,45 @@ void ps_command() {
     }
 }
 
+void mem_command() {
+    uint64_t *info = sys_get_mem_info();
+    if (info == NULL) {
+        printf("Error: Unable to get memory information\n");
+        return;
+    }
+    
+    printf("Memory State:\n");
+    printf("=============\n");
+    printf("Total Memory:     %u bytes\n", (unsigned int)info[0]);
+    printf("Used Memory:      %u bytes\n", (unsigned int)info[1]);
+    printf("Free Memory:      %u bytes\n", (unsigned int)(info[0] - info[1]));
+
+    // Calculate percentages
+    if (info[0] > 0) {
+        uint64_t used_percent = (info[1] * 100) / info[0];
+        uint64_t free_percent = 100 - used_percent;
+        printf("Memory Usage:     %u%% used, %u%% free\n", (unsigned int)used_percent, (unsigned int)free_percent);
+    }
+    
+    // Show in more readable units if the numbers are large
+    if (info[0] >= 1024 * 1024) {
+        printf("\nIn MiB:\n");
+        printf("Total Memory:     %u MiB\n", (unsigned int)(info[0] / (1024 * 1024)));
+        printf("Used Memory:      %u MiB\n", (unsigned int)(info[1] / (1024 * 1024)));
+        printf("Free Memory:      %u MiB\n", (unsigned int)((info[0] - info[1]) / (1024 * 1024)));
+    } else if (info[0] >= 1024) {
+        printf("\nIn KiB:\n");
+        printf("Total Memory:     %u KiB\n", (unsigned int)(info[0] / 1024));
+        printf("Used Memory:      %u KiB\n", (unsigned int)(info[1] / 1024));
+        printf("Free Memory:      %u KiB\n", (unsigned int)((info[0] - info[1]) / 1024));
+    }
+    
+    // Memory chunks information (if available)
+    if (info[2] > 0) {
+        printf("Memory Chunks:    %u\n", (unsigned int)info[2]);
+    }
+}
+
 int loop_command(int argc, char **argv) {
     if (argc != 0) {
         printf("Usage: loop (no arguments)\n");
