@@ -28,11 +28,11 @@ int isVowel(int c) {
 
 
 uint64_t gets(char * buf, uint64_t length) {
-    char c;
+    uint64_t c;
     int i = 0;
     do {
         c=getchar();
-        if (c >= 0x20 && c <= 0x7F) { //PVS This is not necessarily a bug. Since c is a char which is typically signed and ranges from -128 to 127, the condition c <= 0x7F (127) could be false for negative values if char is signed
+        if (c >= 0x20 && c <= 0x7F) {
             *buf = c;
             putchar(c);
             buf++;
