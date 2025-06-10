@@ -8,7 +8,7 @@ typedef struct {
     int specialFlag; // 0 for normally-accessed, 1 for shift-accessed, 2 for ctrl-accessed, 3 for alt-accessed
 } AsciiMap;
 
-extern char getKey();   // de libasm.asm
+extern char getKey();
 char mapKey(char character, int flags[2]);
 void keyboard_handler();
 

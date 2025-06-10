@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/string.h"
 
 int strcmp(const char *str1, const char *str2) {
@@ -39,4 +41,21 @@ void* memcpy(void* dest, const void* src, int n) {
         *d++ = *s++;
     }
     return dest;
+}
+
+char *strchr(char* str, char c)
+{
+    while(*str != 0)
+    {
+        if(*str == c)
+            return str;
+        str++;
+    }
+    return 0;
+}
+
+char to_lower(char c) {
+    if (c >= 'A' && c <= 'Z')
+        return c + 32;
+    return c;
 }

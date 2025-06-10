@@ -20,6 +20,14 @@ GLOBAL saveCurrentRegisters
 GLOBAL _exception00Handler
 GLOBAL _exception06Handler
 
+global create_process_stack_frame
+global acquire, release
+
+global asm_do_timer_tick
+
+global asm_lock
+global asm_unlock
+
 
 EXTERN main
 EXTERN getStackBase
@@ -28,6 +36,7 @@ EXTERN irqDispatcher
 EXTERN exceptionDispatcher
 
 EXTERN int80_write
+EXTERN scheduler
 
 SECTION .text
 
@@ -228,7 +237,22 @@ picSlaveMask:
 
 ;8254 Timer (Timer Tick)
 _irq00Handler:
-	irqHandlerMaster 0
+    ;irq_handler 0
+	;caso especial para el scheduler
+
+    pushState
+	mov rdi, 0 ; pasaje de parametro
+	call irqDispatcher
+
+	mov rdi, rsp
+	call scheduler
+	mov rsp, rax
+
+	mov al, 0x20
+	out 0x20, al
+
+	popState
+	iretq
 
 ;Keyboard
 _irq01Handler:
@@ -282,7 +306,65 @@ haltcpu:
 	hlt
 	ret
 
+; Parametros:
+; (void *)code -> rdi
+; (void *)stack_end -> rsi
+; (void *)argv -> rdx
+; (uint64_t)argc -> rcx
+; (void *)process_handler -> r8
+create_process_stack_frame:
+	; Previous stack
+    mov r14, rsp     ; Preserve rsp 
+    mov r15, rbp     ; Preserve rbp
 
+	; New stack (for the program)
+    mov rsp, rsi     ; Set sp of the process 
+    mov rbp, rsi     ; Set bp of the process
+
+    push 0x0         ; ss 
+    push rsi         ; rsp
+    push 0x202       ; rflags
+    push 0x8         ; cs 
+    push r8         ; rip 
+
+	mov rdi, rdi		; code
+    mov rsi, rdx     	; argv
+    mov rdx, rcx     	; argc
+	pushState
+
+    mov rax, rsp  
+    mov rsp, r14
+    mov rbp, r15
+    
+    ret
+
+asm_do_timer_tick:
+	int 0x20
+	ret
+
+acquire:
+    mov rax, 0          ; Value we want to set (locked)
+.retry:
+    xchg [rdi], rax     ; Atomically swap with memory
+    test rax, rax       ; Test if it was already locked (1)
+    jz .retry          ; If it was locked, retry
+    ret                 ; If it was unlocked (0), we got the lock
+release:
+    mov DWORD [rdi], 1  ; Set to unlocked
+    ret
+
+asm_lock:
+    mov rax,0
+    mov al,1
+    xchg al,[rdi]
+    cmp al,0
+    jne asm_lock
+    ret
+
+asm_unlock:
+    mov byte [rdi],0
+    ret
+	
 SECTION .bss
 	aux resq 1
 	regex resq 18 			;reserva espacio para 18 qwords (cada registro para mostrarlos en las excepciones)

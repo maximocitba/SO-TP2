@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <stdio.h>
 #include <unistd.h>
 #include <stdint.h>
@@ -60,6 +62,11 @@ int buildImage(array_t fileArray, char *output_file) {
 
 	//First, write the kernel
 	FILE *source = fopen(fileArray.array[0], "r");
+	if (source == NULL) {
+		printf("Can't open kernel file: %s\n", fileArray.array[0]);
+		fclose(target);
+		return FALSE;
+	}
 	write_file(target, source);
 
 	//Write how many extra binaries we got.
@@ -70,6 +77,11 @@ int buildImage(array_t fileArray, char *output_file) {
 	int i;
 	for (i = 1 ; i < fileArray.length ; i++) {
 		FILE *source = fopen(fileArray.array[i], "r");
+		if (source == NULL) {
+			printf("Can't open module file: %s\n", fileArray.array[i]);
+			fclose(target);
+			return FALSE;
+		}
 		
 		//Write the file size;
 		write_size(target, fileArray.array[i]);
@@ -100,9 +112,12 @@ int checkFiles(array_t fileArray) {
 
 int write_size(FILE *target, char *filename) {
 	struct stat st;
-	stat(filename, &st);
+	if (stat(filename, &st) != 0) {
+		return FALSE;
+	}
 	uint32_t size = st.st_size;
 	fwrite(&size, sizeof(uint32_t), 1, target);
+	return TRUE;
 }
 
 

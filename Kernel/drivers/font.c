@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "font.h"
 
 char mappedChars[4096][8] = {
@@ -2653,7 +2655,7 @@ char mappedChars[4096][8] = {
 	{0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0},
-	// 0x9C !^\
+	// 0x9C !^
 	{0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0},
@@ -3741,7 +3743,7 @@ char mappedChars[4096][8] = {
 	{0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0},
-	// 0xDC !\
+	// 0xDC !
 	{0, 1, 1, 0, 1, 1, 0, 0},
 	{0, 1, 1, 0, 1, 1, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0},

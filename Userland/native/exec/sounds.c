@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/sounds.h"
 #include "../include/syscalls.h"
 #define MAX_SIZE 128
@@ -48,13 +50,12 @@ void initializeQueue() {
     not_played_yet.size = 0;
 }
 
-void initializeQueueWithArray(int arr[], int n) {
+void initializeQueueWithArray(MusicalNote arr[], int n) {
     if (n >= MAX_SIZE) return;
     not_played_yet.front = 0;
-    not_played_yet.rear = n - 1; // Rear points to the last element
+    not_played_yet.rear = n - 1;
     not_played_yet.size = n;
 
-    // Copy elements from the array to the queue
     for (int i = 0; i < n; i++) {
         not_played_yet.data[i] = arr[i];
     }
@@ -112,8 +113,8 @@ void play_song(int song_id){
         case 2: initializeQueueWithArray(os_initiating, OS_INITIALIZING_LENGTH); break;
         case 3: initializeQueueWithArray(you_lost, YOU_LOST_LENGTH); break;
         default: initializeQueue(); break;
-        last_note_ticks = sys_ticks_elapsed;
     }
+    last_note_ticks = sys_ticks_elapsed();
 }
 
 void playNote(MusicalNote note){

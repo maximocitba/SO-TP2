@@ -1,6 +1,8 @@
+all:  toolchain bootloader kernel userland image
 
-all:  bootloader kernel userland image
-
+toolchain:
+	cd Toolchain; make all
+	
 bootloader:
 	cd Bootloader; make all
 
@@ -10,13 +12,23 @@ kernel:
 userland:
 	cd Userland; make all
 
-image: kernel bootloader userland
+image: kernel bootloader userland Toolchain/ModulePacker/mp.bin
 	cd Image; make all
 
+Toolchain/ModulePacker/mp.bin:
+	cd Toolchain/ModulePacker; make all
+
 clean:
+	cd Toolchain; make clean
 	cd Bootloader; make clean
 	cd Image; make clean
 	cd Kernel; make clean
 	cd Userland; make clean
+	# Remove ELF and BIN files from the project root
+	rm -f *.elf *.bin
+	# Remove PVS-Studio analysis files
+	rm -f report.tasks strace_out
+	rm -f Userland/strace_out
+
 
 .PHONY: bootloader image collections kernel userland all clean

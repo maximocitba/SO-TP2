@@ -6,9 +6,17 @@
 *.ko
 *.obj
 *.elf
+*.bin
+
+# Ignore the compiled test files
+Userland/native/tests/*.o
+
+# Compiled module files
+0000-sampleCodeModule.elf
+0000-sampleCodeModule.bin
+0001-sampleDataModule.bin
 
 # others (added after)
-*.bin
 *.sys
 
 # Linker output
@@ -290,6 +298,23 @@ fabric.properties
 .gdb_history
 /Image/x64BareBonesImage.*
 
+# Editor files
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS specific
+.DS_Store
+Thumbs.db
+
 # End of https://mrkandreev.name/snippets/gitignore-generator/#C,CMake,Python,Assembler,JetBrains
 /compile_and_run.sh
 /clean.sh
+TP 2.pdf
+.vscode/*
+.vscode/settings.json
+.PVS-Studio/
+.PVS-Studio/*
+report.tasks
+strace_out

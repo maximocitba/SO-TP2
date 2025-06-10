@@ -1,12 +1,14 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/stdlib.h"
 #include "../include/syscalls.h"
 #include "../include/string.h"
+#include "../include/definitions.h"
 
 uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base);
 
 void putcharColoured(char c, uint64_t foreground, uint64_t background) {
-    char buf[1] = {c};
-    sys_write(1, buf, 1);
+    sys_write(STDOUT, &c, 1, foreground);
 }
 
 void putchar(char c) {
@@ -14,27 +16,33 @@ void putchar(char c) {
 }
 
 uint64_t getchar() {
-    char buf[1];
-    sys_read(0, buf, 1);
-    return buf[0];
+    char c;
+    sys_read(STDIN, &c, 1);
+    return c;
+}
+
+int isVowel(int c) {
+    return (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u' ||
+            c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U');
 }
 
 
 uint64_t gets(char * buf, uint64_t length) {
-    char c;
+    uint64_t c;
     int i = 0;
     do {
         c=getchar();
         if (c >= 0x20 && c <= 0x7F) {
             *buf = c;
             putchar(c);
+            buf++;
+            i++;
         } else if (c == '\n') {
             *buf = '\0';
             putchar('\n');
             return i;
         }
-        buf++;
-    } while (i < length-1 && c != '\n');
+    } while (i < length-1 && c != '\n'); //PVS This is misleading analysis. The condition c != '\n' is not always true since c is read in each iteration and could be '\n'.
     *buf = '\0';
     return i;
 }
@@ -122,4 +130,22 @@ char getKey() {
         c[0] = 0;
     }
     return c[0];
+}
+
+void * memset(void * destiation, int32_t c, uint64_t length) {
+	uint8_t chr = (uint8_t)c;
+	char * dst = (char*)destiation;
+
+	while(length--)
+		dst[length] = chr;
+
+	return destiation;
+}
+
+void * malloc(uint64_t size) {
+    return sys_malloc(size);
+}
+
+void free(void * ptr) {
+    sys_free(ptr);
 }
