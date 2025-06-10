@@ -129,18 +129,11 @@ uint64_t vprintf_color(const char *fmt, uint64_t foreground, uint64_t background
             case 's': {
                 char *s = va_arg(args, char *);
                 if (s == ((char *)0)) {
-                    putcharColoured('(', foreground, background);
-                    char_count++;
-                    putcharColoured('n', foreground, background);
-                    char_count++;
-                    putcharColoured('u', foreground, background);
-                    char_count++;
-                    putcharColoured('l', foreground, background);
-                    char_count++;
-                    putcharColoured('l', foreground, background);
-                    char_count++;
-                    putcharColoured(')', foreground, background);
-                    char_count++;
+                    const char *null_str = "(null)";
+                    for (int k = 0; null_str[k]; k++) {
+                        putcharColoured(null_str[k], foreground, background);
+                        char_count++;
+                    }
                 } else {
                     for (int k = 0; s[k]; k++) {
                         putcharColoured(s[k], foreground, background);
@@ -203,9 +196,5 @@ void printf(const char *fmt, ...) {
 void printInt(int num) {
     char buffer[40];
     uintToBase(num, buffer, 10);
-    printf(buffer);
+    printf("%s", buffer);
 }
-
-// void simplePrintf(char* str){
-//    for (int i=0; str[i]; i++) putchar(str[i]);
-// }

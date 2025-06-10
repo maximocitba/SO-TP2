@@ -65,7 +65,8 @@ int32_t get_next_ready_pid() {
         return idle_pid;
     }
 
-    if (scheduler->remaining_processes - scheduler->num_bg_processes <= 1) {
+    if (scheduler->num_bg_processes < scheduler->remaining_processes && 
+        scheduler->remaining_processes - scheduler->num_bg_processes <= 1) {
         idle_rotation = (idle_rotation + 1) % 2;
         if (idle_rotation == 0) {
             return idle_pid;
@@ -73,7 +74,7 @@ int32_t get_next_ready_pid() {
     }
 
     start_iterator(scheduler->process_list);
-    while (has_next(scheduler->process_list)) {
+    if (has_next(scheduler->process_list)) {
         process_t *process = (process_t *)get_next(scheduler->process_list);
         return process->pid;
     }
@@ -98,6 +99,15 @@ void *scheduler(void *stack_pointer) {
         current_process != NULL &&
         (current_process->state == running || current_process->state == ready)) {
         return stack_pointer;
+    }
+
+    if (current_process == NULL) {
+        int32_t next_pid = get_next_ready_pid();
+        scheduler->current_pid = next_pid;
+        next_process = (process_t *)scheduler->processes[next_pid]->process;
+        next_process->state = running;
+        scheduler->current_quantum = default_quantum;
+        return next_process->stack_pointer;
     }
 
     switch (current_process->state) {

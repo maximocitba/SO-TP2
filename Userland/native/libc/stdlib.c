@@ -32,16 +32,17 @@ uint64_t gets(char * buf, uint64_t length) {
     int i = 0;
     do {
         c=getchar();
-        if (c >= 0x20 && c <= 0x7F) {
+        if (c >= 0x20 && c <= 0x7F) { //PVS This is not necessarily a bug. Since c is a char which is typically signed and ranges from -128 to 127, the condition c <= 0x7F (127) could be false for negative values if char is signed
             *buf = c;
             putchar(c);
+            buf++;
+            i++;
         } else if (c == '\n') {
             *buf = '\0';
             putchar('\n');
             return i;
         }
-        buf++;
-    } while (i < length-1 && c != '\n');
+    } while (i < length-1 && c != '\n'); //PVS This is misleading analysis. The condition c != '\n' is not always true since c is read in each iteration and could be '\n'.
     *buf = '\0';
     return i;
 }

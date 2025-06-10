@@ -49,6 +49,9 @@ echo "Starting PVS-Studio trace analysis..."
 echo "Running: pvs-studio-analyzer trace -- make"
 pvs-studio-analyzer trace -- make
 
+# echo "Running: pvs-studio-analyzer trace -- make KERNEL_MEMMAN_IMPL=mymemman"
+# pvs-studio-analyzer trace -- make KERNEL_MEMMAN_IMPL=mymemman
+
 echo "Analyzing traced compilation..."
 echo "Running: pvs-studio-analyzer analyze"
 pvs-studio-analyzer analyze

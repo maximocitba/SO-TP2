@@ -46,11 +46,7 @@ command_t commands[] = {
 static void parse_buffer(char *buff, parsed_input_t *parsed);
 static int execute_command(parsed_input_t *parsed);
 
-// ...existing includes and definitions...
-
 void shell() {
-    // play_song(2);
-    // while (next_part());
     printHeader();
 
     char buff[MAX_BUF] = {0};

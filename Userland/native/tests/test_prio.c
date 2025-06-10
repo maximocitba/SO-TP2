@@ -29,10 +29,10 @@ void test_prio() {
     for (i = 0; i < TOTAL_PROCESSES; i++){
         pids[i] = sys_exec((void *)&endless_loop_print_wrap, NULL, 0, "test", LOWEST);
         if (pids[i] == -1) {
-            printf("test_prio: ERROR creating process %d\n", i);
+            printf("test_prio: ERROR creating process %u\n", (unsigned int)i);
             return;
         } else {
-            printf("Process with pid %d created with priority %d\n", pids[i], LOWEST);
+            printf("Process with pid %d created with priority %d\n", (int)pids[i], LOWEST);
         }
     }
 
@@ -41,7 +41,7 @@ void test_prio() {
 
     for (i = 0; i < TOTAL_PROCESSES; i++){
         sys_nice(pids[i], prio[i]);
-        printf("Process with pid %d changed to priority %d\n", pids[i], prio[i]);
+        printf("Process with pid %d changed to priority %d\n", (int)pids[i], (int)prio[i]);
     }
 
     bussy_wait(WAIT);
@@ -54,7 +54,7 @@ void test_prio() {
 
     for (i = 0; i < TOTAL_PROCESSES; i++){
         sys_nice(pids[i], MEDIUM);
-        printf("Process with pid %d changed to priority %d\n", pids[i], MEDIUM);
+        printf("Process with pid %d changed to priority %d\n", (int)pids[i], MEDIUM);
     }
 
     printf("UNBLOCKING...\n");

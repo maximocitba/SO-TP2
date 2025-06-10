@@ -61,12 +61,11 @@ uint64_t test_mm(uint64_t max_memory) {
                     return -1;
                 }
 
-        // printf("starting test free\n");
         // Free
         for (i = 0; i < rq; i++)
             if (mm_rqs[i].address){
                 free(mm_rqs[i].address);
-                printf("freed block %d of size %d\n", i, mm_rqs[i].size);
+                printf("freed block %d of size %u\n", i, mm_rqs[i].size);
             }
 
     }

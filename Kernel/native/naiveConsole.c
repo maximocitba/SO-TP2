@@ -5,9 +5,9 @@
 // VGA text mode video memory address
 #define VGA_VIDEO_MEMORY 0xB8000UL
 
-static char buffer[64] = { '0' };  //-V1009 Intentionally initialize first element to '0' character
-static uint8_t * const video = (uint8_t*)(uintptr_t)VGA_VIDEO_MEMORY; //-V566 Ignore the warning about casting to void* from uintptr_t, as this is intentional for memory address representation.
-static uint8_t * currentVideo = (uint8_t*)(uintptr_t)VGA_VIDEO_MEMORY; //-V566 Ignore the warning about casting to void* from uintptr_t, as this is intentional for memory address representation.
+static char buffer[64] = { '0' };  //PVS Intentionally initialize first element to '0' character
+static uint8_t * const video = (uint8_t*)(uintptr_t)VGA_VIDEO_MEMORY; //PVS Ignore the warning about casting to void* from uintptr_t, as this is intentional for memory address representation.
+static uint8_t * currentVideo = (uint8_t*)(uintptr_t)VGA_VIDEO_MEMORY; //PVS Ignore the warning about casting to void* from uintptr_t, as this is intentional for memory address representation.
 static const uint32_t width = 80;
 static const uint32_t height = 25 ;
 

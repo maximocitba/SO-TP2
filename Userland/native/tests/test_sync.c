@@ -10,9 +10,9 @@
 #define SEM_ID "sem"
 #define TOTAL_PAIR_PROCESSES 2
 
-int64_t global; // shared memory
+int global; // shared memory
 
-void slow_inc(int64_t *p, int64_t inc) {
+void slow_inc(int *p, int inc) {
     int aux = *p;
     sys_yield(); // This makes the race condition highly probable
     aux += inc;
@@ -37,7 +37,7 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
 
     printf("Starting process with PID: %d\n", sys_get_pid());
     if (use_sem) {
-        sem = sys_sem_open(SEM_ID, 1);
+        sem = sys_sem_open((int64_t)SEM_ID, 1);
         if (sem == -1) {
             printf("Error opening semaphore\n");
             return -1;
@@ -89,7 +89,7 @@ test_sync(uint64_t argc, char *argv[]) {
 
     printf("Final value: ");
 
-    printf("%d\n", global);
+    printf("%d\n", (int)global);
 
     return 0;
 }
