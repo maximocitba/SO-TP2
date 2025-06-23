@@ -157,7 +157,6 @@ void ps_command() {
         }
         char *fg_bg_str = (processes[i].fg == foreground) ? "FG" : "BG";
 
-
         printf("%d | %d | %d | %s | %s | %s | %s | %s \n",
             processes[i].pid,
             processes[i].parent_pid,
@@ -176,7 +175,7 @@ void mem_command() {
         printf("Error: Unable to get memory information\n");
         return;
     }
-    
+
     printf("Memory State:\n");
     printf("=============\n");
     printf("Total Memory:     %u bytes\n", (unsigned int)info[0]);
@@ -189,7 +188,7 @@ void mem_command() {
         uint64_t free_percent = 100 - used_percent;
         printf("Memory Usage:     %u%% used, %u%% free\n", (unsigned int)used_percent, (unsigned int)free_percent);
     }
-    
+
     // Show in more readable units if the numbers are large
     if (info[0] >= 1024 * 1024) {
         printf("\nIn MiB:\n");
@@ -202,7 +201,7 @@ void mem_command() {
         printf("Used Memory:      %u KiB\n", (unsigned int)(info[1] / 1024));
         printf("Free Memory:      %u KiB\n", (unsigned int)((info[0] - info[1]) / 1024));
     }
-    
+
     // Memory chunks information (if available)
     if (info[2] > 0) {
         printf("Memory Chunks:    %u\n", (unsigned int)info[2]);
@@ -284,24 +283,43 @@ int echo(int argc, char **argv) {
     return 0;
 }
 
+#define CAT_BUF_SIZE 256
 int cat(int argc, char **argv) {
-    // Check if stdin is connected to a pipe (not the default stdin)
-    // if (sys_get_current_fd(STDIN) == STDIN) {
-    //     printf("cat: This command can only be used with pipes\n");
-    //     printf("Usage: command | cat\n");
-    //     return 1;
-    // }
-    
-    
-    int input = 0;
-    // Read from stdin until EOF
-    // and echo each character to stdout
-    while (input != EOF) {
-        input = 0;
-        input = getchar();
-        if (input == EOF) {
-            break; // Exit loop on EOF
+
+    if (sys_get_current_fd(STDIN) == STDIN) {
+        char buff[MAX_BUF] = {0};
+
+        while (1) {
+
+            int i = 0;
+            memset(buff, 0, MAX_BUF);
+            int break_line = 0;
+            while (!break_line && i < MAX_BUF - 1) {
+                char c = 0;
+                if (sys_read(0, &c, 1) > 0) {
+                    if (c == '\n') {
+                        putchar('\n');
+                        break_line = 1;
+                    } else if (c == 0x08 && i > 0) { // Backspace
+                        putchar(0x08);
+                        i--;
+                        buff[i] = 0;
+                    } else if (c == 0x08 && i == 0) {
+                        // do nothing, can't backspace past start
+                    } else if (c >= 0x20 && c <= 0x7E) { // Printable
+                        putchar(c);
+                        buff[i++] = c;
+                    }
+                }
+            }
+            printf("%s\n", buff);
         }
+        
+    }
+
+    int input = 0;
+
+    while ((input = getchar()) != EOF) {
         putchar(input);
     }
     return 0;
@@ -314,7 +332,7 @@ int wc(int argc, char **argv) {
     //     printf("Usage: command | wc\n");
     //     return 1;
     // }
-    
+
     int input = 0;
     int lines = 0;
     while ((input = getchar()) != EOF) {
@@ -333,7 +351,7 @@ int filter(int argc, char **argv) {
     //     printf("Usage: command | filter\n");
     //     return 1;
     // }
-    
+
     int input = 0;
     while ((input = getchar()) != EOF) {
         if (!isVowel(input)) {
