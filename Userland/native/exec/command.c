@@ -299,7 +299,7 @@ int cat(int argc, char **argv) {
     while (input != EOF) {
         input = 0;
         input = getchar();
-        if (input == EOF || input == 0) {
+        if (input == EOF) {
             break; // Exit loop on EOF
         }
         putchar(input);

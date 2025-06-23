@@ -121,18 +121,19 @@ int sys_read(int fd, char *buf, int count) {
         read_pipe(get_current_pid(), current_fd, buf, count);
         return count;
     }
-
+    sem_wait("key"); // bloquea el semaforo 30 para evitar conflictos de escritura
     int i = 0;
     if (current_fd == 0) {
         for (i = 0; i < count && i < sizeIn; i++) {
-            sem_wait("key"); // bloquea el semaforo 30 para evitar conflictos de escritura
+            
             buf[i] = stdinArr[(startsIn + i) % SIZE_BUFFER];
-            sem_post("key"); // libera el semaforo 30
+            
         }
         startsIn += i;
         startsIn = startsIn % SIZE_BUFFER;
         sizeIn -= i;
     }
+    sem_post("key"); // libera el semaforo 30
     return i;
 }
 
