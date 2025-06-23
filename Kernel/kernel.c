@@ -7,6 +7,8 @@
 #include <pipes.h>
 #include <scheduler.h>
 #include <stdint.h>
+#include <semaphore.h>
+
 
 extern void test_int_80h();
 
@@ -43,6 +45,7 @@ void *getStackBase() {
 
 void *initializeKernelBinary() {
 
+    
     void *moduleAddresses[] = {
         sampleCodeModuleAddress,
         sampleDataModuleAddress};
@@ -59,6 +62,7 @@ void *initializeKernelBinary() {
 }
 
 int main() {
+    sem_open("key", 1);
     create_process((function)sampleCodeModuleAddress, NULL, 0, "shell", high, 1);
 
     load_idt();

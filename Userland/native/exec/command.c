@@ -286,16 +286,22 @@ int echo(int argc, char **argv) {
 
 int cat(int argc, char **argv) {
     // Check if stdin is connected to a pipe (not the default stdin)
-    if (sys_get_current_fd(STDIN) == STDIN) {
-        printf("cat: This command can only be used with pipes\n");
-        printf("Usage: command | cat\n");
-        return 1;
-    }
+    // if (sys_get_current_fd(STDIN) == STDIN) {
+    //     printf("cat: This command can only be used with pipes\n");
+    //     printf("Usage: command | cat\n");
+    //     return 1;
+    // }
+    
     
     int input = 0;
     // Read from stdin until EOF
     // and echo each character to stdout
-    while ((input = getchar()) != EOF) {
+    while (input != EOF) {
+        input = 0;
+        input = getchar();
+        if (input == EOF || input == 0) {
+            break; // Exit loop on EOF
+        }
         putchar(input);
     }
     return 0;
@@ -303,11 +309,11 @@ int cat(int argc, char **argv) {
 
 int wc(int argc, char **argv) {
     // Check if stdin is connected to a pipe (not the default stdin)
-    if (sys_get_current_fd(STDIN) == STDIN) {
-        printf("wc: This command can only be used with pipes\n");
-        printf("Usage: command | wc\n");
-        return 1;
-    }
+    // if (sys_get_current_fd(STDIN) == STDIN) {
+    //     printf("wc: This command can only be used with pipes\n");
+    //     printf("Usage: command | wc\n");
+    //     return 1;
+    // }
     
     int input = 0;
     int lines = 0;
@@ -322,11 +328,11 @@ int wc(int argc, char **argv) {
 
 int filter(int argc, char **argv) {
     // Check if stdin is connected to a pipe (not the default stdin)
-    if (sys_get_current_fd(STDIN) == STDIN) {
-        printf("filter: This command can only be used with pipes\n");
-        printf("Usage: command | filter\n");
-        return 1;
-    }
+    // if (sys_get_current_fd(STDIN) == STDIN) {
+    //     printf("filter: This command can only be used with pipes\n");
+    //     printf("Usage: command | filter\n");
+    //     return 1;
+    // }
     
     int input = 0;
     while ((input = getchar()) != EOF) {

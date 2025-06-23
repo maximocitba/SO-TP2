@@ -7,6 +7,7 @@
 #include "scheduler.h"
 #include "video.h"
 #include <stdint.h>
+#include "semaphore.h"
 
 #define SIZE_BUFFER 1000
 
@@ -124,7 +125,9 @@ int sys_read(int fd, char *buf, int count) {
     int i = 0;
     if (current_fd == 0) {
         for (i = 0; i < count && i < sizeIn; i++) {
+            sem_wait("key"); // bloquea el semaforo 30 para evitar conflictos de escritura
             buf[i] = stdinArr[(startsIn + i) % SIZE_BUFFER];
+            sem_post("key"); // libera el semaforo 30
         }
         startsIn += i;
         startsIn = startsIn % SIZE_BUFFER;

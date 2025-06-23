@@ -5,6 +5,7 @@
 #include "lib.h"
 #include "scheduler.h"
 #include "video.h"
+#include "semaphore.h"
 
 #define REGS_SIZE 18
 
@@ -164,6 +165,7 @@ char mapKey(char character, int flags[2]) {
 }
 
 void keyboard_handler() {
+    sem_wait("key"); // bloquea el semaforo 30 para evitar conflictos de escritura
     char i = getKey(); // llamada a Assembler
     char key = mapKey(i, keyFlag);
 
@@ -207,4 +209,5 @@ void keyboard_handler() {
         }
         break;
     }
+    sem_post("key");
 }

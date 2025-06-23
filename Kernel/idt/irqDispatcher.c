@@ -4,6 +4,7 @@
 #include "naiveConsole.h"
 #include "time.h"
 #include <stdint.h>
+#include "semaphore.h"
 
 static void int_20();
 static void int_21();
