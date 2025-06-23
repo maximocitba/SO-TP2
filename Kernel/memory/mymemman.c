@@ -178,7 +178,7 @@ static inline block_t *buddy_of(block_t *block) {
 
 size_t *mem_info() {
     buddy_t *buddy = getBuddy();
-    size_t *info = (size_t *)b_alloc(3 * sizeof(size_t));
+    static size_t info[3];
     if (info == NULL) {
         return NULL;
     }
