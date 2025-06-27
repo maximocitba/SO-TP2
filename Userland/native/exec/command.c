@@ -18,16 +18,7 @@
 
 #define PS_COMMAND_MAX_PROCESS_DISPLAY 16 // Reduced from 64 to 16 to prevent stack overflow
 
-// void print_help() {
-//     printf("Presiona left alt para guardar registros en cualquier momento\n");
-//     printf("Comandos disponibles:\n");
-//     for (int i = 0; i < sizeof(commands) / sizeof(command); i++) {
-//         printf(commands[i].title);
-//         printf(" : ");
-//         printf(commands[i].desc);
-//         printf("\n");
-//     }
-// }
+
 
 void clear() {
     sys_clear();
@@ -63,7 +54,7 @@ void test_mem(uint64_t argc, char *argv[]) {
         return;
     }
 
-    test_mm(argv[0] ? satoi(argv[0]) : 0); //{n, 0, 0}
+    test_mm(argv[0] ? satoi(argv[0]) : 0);
 }
 
 void test_proc(uint64_t argc, char *argv[]) {
@@ -81,8 +72,7 @@ void test_proc(uint64_t argc, char *argv[]) {
 }
 
 void test_prior() {
-    // int pid = sys_exec((void *)&test_prio, NULL, 0, "test_prio", 1);
-    // sys_waitpid(pid); // Espera a que el proceso termine
+
     test_prio();
 }
 
@@ -345,7 +335,7 @@ int cat(int argc, char **argv) {
 }
 
 int wc(int argc, char **argv) {
-    // Check if stdin is connected to a pipe
+
     int lines = 0;
     if (sys_get_current_fd(STDIN) != STDIN) {
         // Reading from pipe - original behavior
@@ -365,7 +355,7 @@ int wc(int argc, char **argv) {
     
     if (i == 0) {
         printf("Lines: 0\n");
-        return 0; // No input, no lines
+        return 0; 
     }
 
     if (buff[i - 1] != '\n') {
@@ -376,7 +366,7 @@ int wc(int argc, char **argv) {
             lines++;
         }
     }
-    // If there's content but no final newline, count it as a line
+
     if (i > 0 && buff[i - 1] != '\n') {
         lines++;
     }
