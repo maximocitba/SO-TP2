@@ -208,6 +208,35 @@ void mem_command() {
     }
 }
 
+// Helper function for reading input from terminal (interactive mode)
+int read_input_to_buffer(char *buff, int max_size) {
+    memset(buff, 0, max_size);
+    int i = 0;
+    int break_input = 0;
+    
+    while (!break_input && i < max_size - 1) {
+        char c = 0;
+        if (sys_read(0, &c, 1) > 0) {
+            if (c == EOF) { // EOF from Ctrl+D
+                break_input = 1;
+            } else if (c == '\n') {
+                buff[i++] = c;
+                putchar('\n');
+            } else if (c == 0x08 && i > 0) { // Backspace
+                putchar(0x08);
+                i--;
+                buff[i] = 0;
+            } else if (c == 0x08 && i == 0) {
+                // do nothing, can't backspace past start
+            } else if (c >= 0x20 && c <= 0x7E) { // Printable
+                putchar(c);
+                buff[i++] = c;
+            }
+        }
+    }
+    return i;
+}
+
 int loop_command(int argc, char **argv) {
     if (argc != 0) {
         printf("Usage: loop (no arguments)\n");
@@ -296,30 +325,7 @@ int cat(int argc, char **argv) {
     
     // Reading from terminal - interactive mode
     char buff[MAX_BUF];
-    memset(buff, 0, MAX_BUF);
-    int i = 0;
-    int break_input = 0;
-    
-    while (!break_input && i < MAX_BUF - 1) {
-        char c = 0;
-        if (sys_read(0, &c, 1) > 0) {
-            if (c == EOF) { // EOF from Ctrl+D
-                break_input = 1;
-            } else if (c == '\n') {
-                buff[i++] = c;
-                putchar('\n');
-            } else if (c == 0x08 && i > 0) { // Backspace
-                putchar(0x08);
-                i--;
-                buff[i] = 0;
-            } else if (c == 0x08 && i == 0) {
-                // do nothing, can't backspace past start
-            } else if (c >= 0x20 && c <= 0x7E) { // Printable
-                putchar(c);
-                buff[i++] = c;
-            }
-        }
-    }
+    int i = read_input_to_buffer(buff, MAX_BUF);
     
     if (i == 0) {
         return 0; // No input to echo
@@ -355,30 +361,8 @@ int wc(int argc, char **argv) {
     
     // Reading from terminal - interactive mode
     char buff[MAX_BUF];
-    memset(buff, 0, MAX_BUF);
-    int i = 0;
-    int break_input = 0;
+    int i = read_input_to_buffer(buff, MAX_BUF);
     
-    while (!break_input && i < MAX_BUF - 1) {
-        char c = 0;
-        if (sys_read(0, &c, 1) > 0) {
-            if (c == EOF) { // EOF from Ctrl+D
-                break_input = 1;
-            } else if (c == '\n') {
-                buff[i++] = c;
-                putchar('\n');
-            } else if (c == 0x08 && i > 0) { // Backspace
-                putchar(0x08);
-                i--;
-                buff[i] = 0;
-            } else if (c == 0x08 && i == 0) {
-                // do nothing, can't backspace past start
-            } else if (c >= 0x20 && c <= 0x7E) { // Printable
-                putchar(c);
-                buff[i++] = c;
-            }
-        }
-    }
     if (i == 0) {
         printf("Lines: 0\n");
         return 0; // No input, no lines
@@ -387,11 +371,14 @@ int wc(int argc, char **argv) {
     if (buff[i - 1] != '\n') {
         putchar('\n');
     }
-    lines = 1; // Start with 1 line if there's any input
     for (int j = 0; j < i; j++) {
         if (buff[j] == '\n') {
             lines++;
         }
+    }
+    // If there's content but no final newline, count it as a line
+    if (i > 0 && buff[i - 1] != '\n') {
+        lines++;
     }
     printf("Lines: %d\n", lines);
     return 0;
@@ -408,32 +395,10 @@ int filter(int argc, char **argv) {
         }
         return 0;
     }
+    
     // Reading from terminal - interactive mode
     char buff[MAX_BUF];
-    memset(buff, 0, MAX_BUF);
-    int i = 0;
-    int break_input = 0;
-    
-    while (!break_input && i < MAX_BUF - 1) {
-        char c = 0;
-        if (sys_read(0, &c, 1) > 0) {
-            if (c == EOF) { // EOF from Ctrl+D
-                break_input = 1;
-            } else if (c == '\n') {
-                buff[i++] = c;
-                putchar('\n');
-            } else if (c == 0x08 && i > 0) { // Backspace
-                putchar(0x08);
-                i--;
-                buff[i] = 0;
-            } else if (c == 0x08 && i == 0) {
-                // do nothing, can't backspace past start
-            } else if (c >= 0x20 && c <= 0x7E) { // Printable
-                putchar(c);
-                buff[i++] = c;
-            }
-        }
-    }
+    int i = read_input_to_buffer(buff, MAX_BUF);
 
     if (i == 0) {
         return 0; // No input to filter
@@ -444,11 +409,12 @@ int filter(int argc, char **argv) {
     }
     // Filter the collected input
     for (int j = 0; j < i; j++) {
-        if (!isVowel(buff[j]) || buff[j] == '\n') {
+        if (!isVowel(buff[j])) {
             putchar(buff[j]);
         } 
     }
     if (i > 0 && buff[i - 1] != '\n') {
         putchar('\n'); // Ensure final newline if not already present
     }
+    return 0;
 }

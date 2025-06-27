@@ -40,4 +40,7 @@ void mem_command();
 extern void runInvalidOpcodeException(void);
 extern void runZeroDivisionException(void);
 
+// Helper function for input handling
+int read_input_to_buffer(char *buff, int max_size);
+
 #endif //TPE_COMMAND_H
