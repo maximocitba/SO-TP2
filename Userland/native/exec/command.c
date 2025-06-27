@@ -283,60 +283,113 @@ int echo(int argc, char **argv) {
     return 0;
 }
 
-#define CAT_BUF_SIZE 256
 int cat(int argc, char **argv) {
-
-    if (sys_get_current_fd(STDIN) == STDIN) {
-        char buff[MAX_BUF] = {0};
-
-        while (1) {
-
-            int i = 0;
-            memset(buff, 0, MAX_BUF);
-            int break_line = 0;
-            while (!break_line && i < MAX_BUF - 1) {
-                char c = 0;
-                if (sys_read(0, &c, 1) > 0) {
-                    if (c == '\n') {
-                        putchar('\n');
-                        break_line = 1;
-                    } else if (c == 0x08 && i > 0) { // Backspace
-                        putchar(0x08);
-                        i--;
-                        buff[i] = 0;
-                    } else if (c == 0x08 && i == 0) {
-                        // do nothing, can't backspace past start
-                    } else if (c >= 0x20 && c <= 0x7E) { // Printable
-                        putchar(c);
-                        buff[i++] = c;
-                    }
-                }
-            }
-            printf("%s\n", buff);
+    // Check if stdin is connected to a pipe
+    if (sys_get_current_fd(STDIN) != STDIN) {
+        // Reading from pipe - original behavior
+        int input = 0;
+        while ((input = getchar()) != EOF) {
+            putchar(input);
         }
-        
+        return 0;
+    }
+    
+    // Reading from terminal - interactive mode
+    char buff[MAX_BUF];
+    memset(buff, 0, MAX_BUF);
+    int i = 0;
+    int break_input = 0;
+    
+    while (!break_input && i < MAX_BUF - 1) {
+        char c = 0;
+        if (sys_read(0, &c, 1) > 0) {
+            if (c == EOF) { // EOF from Ctrl+D
+                break_input = 1;
+            } else if (c == '\n') {
+                buff[i++] = c;
+                putchar('\n');
+            } else if (c == 0x08 && i > 0) { // Backspace
+                putchar(0x08);
+                i--;
+                buff[i] = 0;
+            } else if (c == 0x08 && i == 0) {
+                // do nothing, can't backspace past start
+            } else if (c >= 0x20 && c <= 0x7E) { // Printable
+                putchar(c);
+                buff[i++] = c;
+            }
+        }
+    }
+    
+    if (i == 0) {
+        return 0; // No input to echo
     }
 
-    int input = 0;
-
-    while ((input = getchar()) != EOF) {
-        putchar(input);
+    if (i > 0 && buff[i - 1] != '\n') {
+        putchar('\n');
+    }
+    // Echo the collected input
+    for (int j = 0; j < i; j++) {
+        putchar(buff[j]);
+    }
+    if (i > 0 && buff[i - 1] != '\n') {
+        putchar('\n'); // Ensure final newline if not already present
     }
     return 0;
 }
 
 int wc(int argc, char **argv) {
-    // Check if stdin is connected to a pipe (not the default stdin)
-    // if (sys_get_current_fd(STDIN) == STDIN) {
-    //     printf("wc: This command can only be used with pipes\n");
-    //     printf("Usage: command | wc\n");
-    //     return 1;
-    // }
-
-    int input = 0;
+    // Check if stdin is connected to a pipe
     int lines = 0;
-    while ((input = getchar()) != EOF) {
-        if (input == '\n') {
+    if (sys_get_current_fd(STDIN) != STDIN) {
+        // Reading from pipe - original behavior
+        int input = 0;
+        while ((input = getchar()) != EOF) {
+            if (input == '\n') {
+                lines++;
+            }
+        }
+        printf("Lines: %d\n", lines);
+        return 0;
+    }
+    
+    // Reading from terminal - interactive mode
+    char buff[MAX_BUF];
+    memset(buff, 0, MAX_BUF);
+    int i = 0;
+    int break_input = 0;
+    
+    while (!break_input && i < MAX_BUF - 1) {
+        char c = 0;
+        if (sys_read(0, &c, 1) > 0) {
+            if (c == EOF) { // EOF from Ctrl+D
+                break_input = 1;
+            } else if (c == '\n') {
+                buff[i++] = c;
+                putchar('\n');
+            } else if (c == 0x08 && i > 0) { // Backspace
+                putchar(0x08);
+                i--;
+                buff[i] = 0;
+            } else if (c == 0x08 && i == 0) {
+                // do nothing, can't backspace past start
+            } else if (c >= 0x20 && c <= 0x7E) { // Printable
+                putchar(c);
+                buff[i++] = c;
+            }
+        }
+    }
+    if (i == 0) {
+        printf("Lines: 0\n");
+        return 0; // No input, no lines
+    }
+
+    if (buff[i - 1] != '\n') {
+        putchar('\n');
+    }
+    lines = 1; // Start with 1 line if there's any input
+    for (int j = 0; j < i; j++) {
+        if (buff[j] == '\n') {
             lines++;
         }
     }
@@ -345,18 +398,57 @@ int wc(int argc, char **argv) {
 }
 
 int filter(int argc, char **argv) {
-    // Check if stdin is connected to a pipe (not the default stdin)
-    // if (sys_get_current_fd(STDIN) == STDIN) {
-    //     printf("filter: This command can only be used with pipes\n");
-    //     printf("Usage: command | filter\n");
-    //     return 1;
-    // }
-
-    int input = 0;
-    while ((input = getchar()) != EOF) {
-        if (!isVowel(input)) {
-            putchar(input); // Echo the character if it matches the filter
+    if (sys_get_current_fd(STDIN) != STDIN) {
+    // Reading from pipe - original behavior
+        int input = 0;
+        while ((input = getchar()) != EOF) {
+            if (!isVowel(input)) {
+                putchar(input); // Echo the character if it matches the filter
+            }
+        }
+        return 0;
+    }
+    // Reading from terminal - interactive mode
+    char buff[MAX_BUF];
+    memset(buff, 0, MAX_BUF);
+    int i = 0;
+    int break_input = 0;
+    
+    while (!break_input && i < MAX_BUF - 1) {
+        char c = 0;
+        if (sys_read(0, &c, 1) > 0) {
+            if (c == EOF) { // EOF from Ctrl+D
+                break_input = 1;
+            } else if (c == '\n') {
+                buff[i++] = c;
+                putchar('\n');
+            } else if (c == 0x08 && i > 0) { // Backspace
+                putchar(0x08);
+                i--;
+                buff[i] = 0;
+            } else if (c == 0x08 && i == 0) {
+                // do nothing, can't backspace past start
+            } else if (c >= 0x20 && c <= 0x7E) { // Printable
+                putchar(c);
+                buff[i++] = c;
+            }
         }
     }
-    return 0;
+
+    if (i == 0) {
+        return 0; // No input to filter
+    }
+
+    if (i > 0 && buff[i - 1] != '\n') {
+        putchar('\n');
+    }
+    // Filter the collected input
+    for (int j = 0; j < i; j++) {
+        if (!isVowel(buff[j]) || buff[j] == '\n') {
+            putchar(buff[j]);
+        } 
+    }
+    if (i > 0 && buff[i - 1] != '\n') {
+        putchar('\n'); // Ensure final newline if not already present
+    }
 }
